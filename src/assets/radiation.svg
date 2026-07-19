@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+  <defs>
+    <radialGradient id="blade" cx="38%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#f2bc55"/>
+      <stop offset="40%" stop-color="#e09a2e"/>
+      <stop offset="100%" stop-color="#9a5218"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="#1c1309" stroke="#7a4518" stroke-width="1.5"/>
+  <g fill="url(#blade)">
+    <path d="M32 7.5c1.15 0 2.05.55 2.45 1.45l8.2 18.4c.28.62.1 1.35-.45 1.75a16.2 16.2 0 0 0-20.4 0c-.55-.4-.73-1.13-.45-1.75l8.2-18.4C29.95 8.05 30.85 7.5 32 7.5z"/>
+    <path d="M10.4 48.6c-.55-.95-.4-2.1.4-2.75l16.1-11.2c.58-.4 1.35-.35 1.85.1a16.2 16.2 0 0 0 10.2 17.7c-.15.7-.75 1.2-1.5 1.3l-20.1 2.7c-1.1.15-2.15-.5-2.55-1.55l-4.4-6.3z"/>
+    <path d="M53.6 48.6c-.4 1.05-1.45 1.7-2.55 1.55l-20.1-2.7c-.75-.1-1.35-.6-1.5-1.3a16.2 16.2 0 0 0 10.2-17.7c.5-.45 1.27-.5 1.85-.1l16.1 11.2c.8.65.95 1.8.4 2.75l-4.4 6.3z"/>
+  </g>
+  <circle cx="32" cy="32" r="7.2" fill="#1c1309" stroke="#c47a28" stroke-width="1.25"/>
+  <circle cx="32" cy="32" r="3.4" fill="#e8a838"/>
+</svg>

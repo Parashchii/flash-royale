@@ -1,0 +1,485 @@
+[
+  {
+    "id": "battery",
+    "nameUk": "Батарейка",
+    "nameEn": "Battery",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "broken-rock",
+    "nameUk": "Битий камінь",
+    "nameEn": "Broken Rock",
+    "anomalyType": "gravitational",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "bubble",
+    "nameUk": "Пузир",
+    "nameEn": "Bubble",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "cavity",
+    "nameUk": "Черево",
+    "nameEn": "Cavity",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "chocolate-bar",
+    "nameUk": "Шоколадка",
+    "nameEn": "Chocolate Bar",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "ciliate",
+    "nameUk": "Інфузорія",
+    "nameEn": "Ciliate",
+    "anomalyType": "chemical",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "compass",
+    "nameUk": "Компас",
+    "nameEn": "Compass",
+    "anomalyType": "gravitational",
+    "rarity": "legendary"
+  },
+  {
+    "id": "crest",
+    "nameUk": "Гребінь",
+    "nameEn": "Crest",
+    "anomalyType": "electro",
+    "rarity": "rare"
+  },
+  {
+    "id": "crown",
+    "nameUk": "Корона",
+    "nameEn": "Crown",
+    "anomalyType": "gravitational",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "crust",
+    "nameUk": "Шкарлупа",
+    "nameEn": "Crust",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "crystal",
+    "nameUk": "Кристал",
+    "nameEn": "Crystal",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "crystal-thorn",
+    "nameUk": "Кристальна колючка",
+    "nameEn": "Crystal Thorn",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "dead-sponge",
+    "nameUk": "Мертва губка",
+    "nameEn": "Dead Sponge",
+    "anomalyType": "thermal",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "devils-mushroom",
+    "nameUk": "Чортів гриб",
+    "nameEn": "Devil's Mushroom",
+    "anomalyType": "chemical",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "droplets",
+    "nameUk": "Краплі",
+    "nameEn": "Droplets",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "eye",
+    "nameUk": "Око",
+    "nameEn": "Eye",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "fireball",
+    "nameUk": "Вогняна куля",
+    "nameEn": "Fireball",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "flash",
+    "nameUk": "Спалах",
+    "nameEn": "Flash",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "flaw",
+    "nameUk": "Брак",
+    "nameEn": "Flaw",
+    "anomalyType": "thermal",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "flower-bud",
+    "nameUk": "Бутон",
+    "nameEn": "Flower Bud",
+    "anomalyType": "gravitational",
+    "rarity": "rare"
+  },
+  {
+    "id": "flytrap",
+    "nameUk": "Мухоловка",
+    "nameEn": "Flytrap",
+    "anomalyType": "gravitational",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "glare",
+    "nameUk": "Блиск",
+    "nameEn": "Glare",
+    "anomalyType": "electro",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "goldfish",
+    "nameUk": "Золота рибка",
+    "nameEn": "Goldfish",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  },
+  {
+    "id": "gravi",
+    "nameUk": "Граві",
+    "nameEn": "Gravi",
+    "anomalyType": "gravitational",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "harp",
+    "nameUk": "Арфа",
+    "nameEn": "Harp",
+    "anomalyType": "electro",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "horn",
+    "nameUk": "Ріг",
+    "nameEn": "Horn",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "hypercube",
+    "nameUk": "Гіперкуб",
+    "nameEn": "Hypercube",
+    "anomalyType": "thermal",
+    "rarity": "legendary"
+  },
+  {
+    "id": "jellyfish",
+    "nameUk": "Медуза",
+    "nameEn": "Jellyfish",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  },
+  {
+    "id": "kolobok",
+    "nameUk": "Колобок",
+    "nameEn": "Kolobok",
+    "anomalyType": "chemical",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "lantern",
+    "nameUk": "Ліхтар",
+    "nameEn": "Lantern",
+    "anomalyType": "electro",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "liquid-rock",
+    "nameUk": "Рідкий камінь",
+    "nameEn": "Liquid Rock",
+    "anomalyType": "chemical",
+    "rarity": "legendary"
+  },
+  {
+    "id": "lyre",
+    "nameUk": "Ліра",
+    "nameEn": "Lyre",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "magic-cube",
+    "nameUk": "Кубик Рубіка",
+    "nameEn": "Magic Cube",
+    "anomalyType": "gravitational",
+    "rarity": "rare"
+  },
+  {
+    "id": "magma",
+    "nameUk": "Магма",
+    "nameEn": "Magma",
+    "anomalyType": "thermal",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "mamas-beads",
+    "nameUk": "Мамине намисто",
+    "nameEn": "Mama's Beads",
+    "anomalyType": "thermal",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "meat-chunk",
+    "nameUk": "Шмат м'яса",
+    "nameEn": "Meat Chunk",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "meat-lighter",
+    "nameUk": "М'ясна запальничка",
+    "nameEn": "Meat Lighter",
+    "anomalyType": "thermal",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "mica",
+    "nameUk": "Слюда",
+    "nameEn": "Mica",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "mold",
+    "nameUk": "Пліснява",
+    "nameEn": "Mold",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "moonlight",
+    "nameUk": "Місячне сяйво",
+    "nameEn": "Moonlight",
+    "anomalyType": "electro",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "night-star",
+    "nameUk": "Нічна зірка",
+    "nameEn": "Night Star",
+    "anomalyType": "gravitational",
+    "rarity": "rare"
+  },
+  {
+    "id": "pebble",
+    "nameUk": "Галька",
+    "nameEn": "Pebble",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  },
+  {
+    "id": "pellicle",
+    "nameUk": "Плівка",
+    "nameEn": "Pellicle",
+    "anomalyType": "chemical",
+    "rarity": "rare"
+  },
+  {
+    "id": "petal",
+    "nameUk": "Пелюстка",
+    "nameEn": "Petal",
+    "anomalyType": "thermal",
+    "rarity": "rare"
+  },
+  {
+    "id": "plasma",
+    "nameUk": "Плазма",
+    "nameEn": "Plasma",
+    "anomalyType": "thermal",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "rat-king",
+    "nameUk": "Щурячий король",
+    "nameEn": "Rat King",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "rosin",
+    "nameUk": "Каніфоль",
+    "nameEn": "Rosin",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  },
+  {
+    "id": "sapphire",
+    "nameUk": "Сапфір",
+    "nameEn": "Sapphire",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "shell",
+    "nameUk": "Порожнявка",
+    "nameEn": "Shell",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "shop-class",
+    "nameUk": "Урок праці",
+    "nameEn": "Shop Class",
+    "anomalyType": "electro",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "skipjack",
+    "nameUk": "Стрибунець",
+    "nameEn": "Skipjack",
+    "anomalyType": "chemical",
+    "rarity": "rare"
+  },
+  {
+    "id": "slime",
+    "nameUk": "Слиз",
+    "nameEn": "Slime",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "slug",
+    "nameUk": "Слимак",
+    "nameEn": "Slug",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "snowflake",
+    "nameUk": "Сніжинка",
+    "nameEn": "Snowflake",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "soul",
+    "nameUk": "Душа",
+    "nameEn": "Soul",
+    "anomalyType": "electro",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "sparkler",
+    "nameUk": "Бенгальський вогонь",
+    "nameEn": "Sparkler",
+    "anomalyType": "electro",
+    "rarity": "common"
+  },
+  {
+    "id": "spinner",
+    "nameUk": "Дзиґа",
+    "nameEn": "Spinner",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "spring",
+    "nameUk": "Пружина",
+    "nameEn": "Spring",
+    "anomalyType": "gravitational",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "starfish",
+    "nameUk": "Морська зірка",
+    "nameEn": "Starfish",
+    "anomalyType": "electro",
+    "rarity": "rare"
+  },
+  {
+    "id": "steak",
+    "nameUk": "Біфштекс",
+    "nameEn": "Steak",
+    "anomalyType": "thermal",
+    "rarity": "common"
+  },
+  {
+    "id": "stone-blood",
+    "nameUk": "Кров каменю",
+    "nameEn": "Stone Blood",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  },
+  {
+    "id": "stone-heart",
+    "nameUk": "Кам'яне серце",
+    "nameEn": "Stone Heart",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  },
+  {
+    "id": "thorn",
+    "nameUk": "Колючка",
+    "nameEn": "Thorn",
+    "anomalyType": "chemical",
+    "rarity": "common"
+  },
+  {
+    "id": "thunderberry",
+    "nameUk": "Грозова ягода",
+    "nameEn": "Thunderberry",
+    "anomalyType": "electro",
+    "rarity": "legendary"
+  },
+  {
+    "id": "torch",
+    "nameUk": "Факел",
+    "nameEn": "Torch",
+    "anomalyType": "thermal",
+    "rarity": "rare"
+  },
+  {
+    "id": "tourists-breakfast",
+    "nameUk": "Сніданок туриста",
+    "nameEn": "Tourist's Breakfast",
+    "anomalyType": "chemical",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "urchin",
+    "nameUk": "Морський їжак",
+    "nameEn": "Urchin",
+    "anomalyType": "chemical",
+    "rarity": "uncommon"
+  },
+  {
+    "id": "whirlwind",
+    "nameUk": "Вихор",
+    "nameEn": "Whirlwind",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  },
+  {
+    "id": "wrenched",
+    "nameUk": "Виверт",
+    "nameEn": "Wrenched",
+    "anomalyType": "gravitational",
+    "rarity": "common"
+  }
+]

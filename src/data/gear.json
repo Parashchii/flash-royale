@@ -1,0 +1,254 @@
+[
+  {
+    "id": "berill-5m",
+    "nameUk": "Бронекостюм «Берил-5М»",
+    "nameEn": "Berill-5M Armored Suit",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "bulwark-exo",
+    "nameUk": "Екзокостюм «Оплот»",
+    "nameEn": "Bulwark Exosuit",
+    "category": "armor",
+    "blueprintCount": 4
+  },
+  {
+    "id": "shield-duty-exo",
+    "nameUk": "Екзокостюм «Щит Долгу»",
+    "nameEn": "Shield of Duty Exosuit",
+    "category": "armor",
+    "blueprintCount": 4
+  },
+  {
+    "id": "exoskeleton",
+    "nameUk": "Екзоскелет",
+    "nameEn": "Exoskeleton",
+    "category": "armor",
+    "blueprintCount": 3
+  },
+  {
+    "id": "brummbar-exo",
+    "nameUk": "Екзоскелет «Брумбар»",
+    "nameEn": "Brummbar Exoskeleton",
+    "category": "armor",
+    "blueprintCount": 4
+  },
+  {
+    "id": "liberty-exo",
+    "nameUk": "Екзоскелет «Воля»",
+    "nameEn": "Liberty Exoskeleton",
+    "category": "armor",
+    "blueprintCount": 3
+  },
+  {
+    "id": "operator-exo",
+    "nameUk": "Екзоскелет «Оператор»",
+    "nameEn": "Operator Exoskeleton",
+    "category": "armor",
+    "blueprintCount": 3
+  },
+  {
+    "id": "cuirass-exo",
+    "nameUk": "Екзоскелет «Панцир»",
+    "nameEn": "Cuirass Exoskeleton",
+    "category": "armor",
+    "blueprintCount": 4
+  },
+  {
+    "id": "seva-i",
+    "nameUk": "Комбінезон «СЕВА-І»",
+    "nameEn": "SEVA-I Suit",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "seva-v",
+    "nameUk": "Комбінезон «СЕВА-В»",
+    "nameEn": "SEVA-V Suit",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "seva-d",
+    "nameUk": "Комбінезон «СЕВА-Д»",
+    "nameEn": "SEVA-D Suit",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "seva",
+    "nameUk": "Комбінезон «СЕВА»",
+    "nameEn": "SEVA Suit",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "psz-12v-bulat",
+    "nameUk": "ПСЗ-12В «Булат»",
+    "nameEn": "PSZ-12V Bulat",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "psz-9i-falcon",
+    "nameUk": "ПСЗ-9І «Сокіл»",
+    "nameEn": "PSZ-9I Falcon",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "psz-9d-duty",
+    "nameUk": "ПСЗ-9Д «Броня Долгу»",
+    "nameEn": "PSZ-9D Duty Armor",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "ssp-100",
+    "nameUk": "ССП-100 «Відкриття»",
+    "nameEn": "SSP-100 Discovery",
+    "category": "armor",
+    "blueprintCount": 2
+  },
+  {
+    "id": "ballistic-helmet",
+    "nameUk": "Балістичний шолом",
+    "nameEn": "Ballistic Helmet",
+    "category": "helmet",
+    "blueprintCount": 1
+  },
+  {
+    "id": "tactical-helmet",
+    "nameUk": "Тактичний шолом",
+    "nameEn": "Tactical Helmet",
+    "category": "helmet",
+    "blueprintCount": 1
+  },
+  {
+    "id": "mask-1",
+    "nameUk": "Шолом «Маска-1»",
+    "nameEn": "Mask-1 Helmet",
+    "category": "helmet",
+    "blueprintCount": 1
+  },
+  {
+    "id": "sphere-m20",
+    "nameUk": "Шолом «Сфера-М20»",
+    "nameEn": "Sphere M20 Helmet",
+    "category": "helmet",
+    "blueprintCount": 1
+  },
+  {
+    "id": "integral-a",
+    "nameUk": "Integral-A",
+    "nameEn": "Integral-A",
+    "category": "weapon",
+    "blueprintCount": 1
+  },
+  {
+    "id": "kharod",
+    "nameUk": "Kharod",
+    "nameEn": "Kharod",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "m10-gordon",
+    "nameUk": "M10 Gordon",
+    "nameEn": "M10 Gordon",
+    "category": "weapon",
+    "blueprintCount": 1
+  },
+  {
+    "id": "m701-super",
+    "nameUk": "M701 Super",
+    "nameEn": "M701 Super",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "m860-cracker",
+    "nameUk": "M860 Cracker",
+    "nameEn": "M860 Cracker",
+    "category": "weapon",
+    "blueprintCount": 1
+  },
+  {
+    "id": "ram-2",
+    "nameUk": "Ram-2",
+    "nameEn": "Ram-2",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "rhino",
+    "nameUk": "Rhino",
+    "nameEn": "Rhino",
+    "category": "weapon",
+    "blueprintCount": 1
+  },
+  {
+    "id": "grom-s14",
+    "nameUk": "«Грім» С-14",
+    "nameEn": "Grom S-14",
+    "category": "weapon",
+    "blueprintCount": 1
+  },
+  {
+    "id": "dnipro",
+    "nameUk": "«Дніпро»",
+    "nameEn": "Dnipro",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "zubr-19",
+    "nameUk": "«Зубр-19»",
+    "nameEn": "Zubr-19",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "saiga-d12",
+    "nameUk": "«Сайга» Д-12",
+    "nameEn": "Saiga D-12",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "apsb",
+    "nameUk": "АПБС",
+    "nameEn": "APSB",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "rpm-74",
+    "nameUk": "РПМ-74",
+    "nameEn": "RPM-74",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "as-lavina",
+    "nameUk": "СА «Лавина»",
+    "nameEn": "AS Lavina",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "svu-mk-s3",
+    "nameUk": "СВУ-МК С-3",
+    "nameEn": "SVU-MK S-3",
+    "category": "weapon",
+    "blueprintCount": 2
+  },
+  {
+    "id": "vs-vintar",
+    "nameUk": "СГ «Гвинтар»",
+    "nameEn": "VS Vintar",
+    "category": "weapon",
+    "blueprintCount": 2
+  }
+]

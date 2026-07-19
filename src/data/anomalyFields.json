@@ -1,0 +1,584 @@
+[
+  {
+    "id": "chem-old-mill",
+    "nameUk": "Старий млин",
+    "region": "Кордон",
+    "anomalyType": "chemical",
+    "worldX": 436356,
+    "worldY": 547330,
+    "nameEn": "Old Mill"
+  },
+  {
+    "id": "elec-pol-depot",
+    "nameUk": "Склад ПЗЛ",
+    "region": "Кордон",
+    "anomalyType": "electro",
+    "worldX": 371048,
+    "worldY": 523525,
+    "nameEn": "Pol Depot"
+  },
+  {
+    "id": "therm-magnetic-cave",
+    "nameUk": "Магнітна печера",
+    "region": "Кордон",
+    "anomalyType": "thermal",
+    "worldX": 390610,
+    "worldY": 571917,
+    "nameEn": "Magnetic Cave"
+  },
+  {
+    "id": "grav-ribs",
+    "nameUk": "Ребра",
+    "region": "Кордон",
+    "anomalyType": "gravitational",
+    "worldX": 414310,
+    "worldY": 572207,
+    "nameEn": "Ribs"
+  },
+  {
+    "id": "grav-deaf-meadow-lz",
+    "nameUk": "Глуха лука (Залісся)",
+    "region": "Кордон",
+    "anomalyType": "gravitational",
+    "worldX": 433130,
+    "worldY": 531216,
+    "nameEn": "Deaf Meadow",
+    "notes": "Lesser Zone"
+  },
+  {
+    "id": "grav-nuclear-waste",
+    "nameUk": "Могильник ядерних відходів",
+    "region": "Кордон",
+    "anomalyType": "gravitational",
+    "worldX": 442271,
+    "worldY": 643268,
+    "nameEn": "Nuclear Waste Burial"
+  },
+  {
+    "id": "grav-abandoned-farmstead",
+    "nameUk": "Покинута ферма",
+    "region": "Кордон",
+    "anomalyType": "gravitational",
+    "worldX": 478415,
+    "worldY": 593223,
+    "nameEn": "Abandoned Farmstead"
+  },
+  {
+    "id": "chem-vehicle-graveyard",
+    "nameUk": "Звалище техніки",
+    "region": "Смітник",
+    "anomalyType": "chemical",
+    "worldX": 360793,
+    "worldY": 495239,
+    "nameEn": "Vehicle Graveyard"
+  },
+  {
+    "id": "chem-poisonous-hole",
+    "nameUk": "Отруйна яма",
+    "region": "Смітник",
+    "anomalyType": "chemical",
+    "worldX": 381278,
+    "worldY": 371590,
+    "nameEn": "Poisonous Hole"
+  },
+  {
+    "id": "elec-depot-train-tunnel",
+    "nameUk": "Тунель депо",
+    "region": "Смітник",
+    "anomalyType": "electro",
+    "worldX": 340125,
+    "worldY": 474447,
+    "nameEn": "Depot Train Tunnel"
+  },
+  {
+    "id": "elec-electric-field",
+    "nameUk": "Електричне поле",
+    "region": "Смітник",
+    "anomalyType": "electro",
+    "worldX": 441105,
+    "worldY": 442098,
+    "nameEn": "Electric Field"
+  },
+  {
+    "id": "therm-detention-center",
+    "nameUk": "Ізолятор",
+    "region": "Смітник",
+    "anomalyType": "thermal",
+    "worldX": 443900,
+    "worldY": 490375,
+    "nameEn": "Detention Center"
+  },
+  {
+    "id": "therm-the-brood",
+    "nameUk": "Виводок",
+    "region": "Смітник",
+    "anomalyType": "thermal",
+    "worldX": 382721,
+    "worldY": 404663,
+    "nameEn": "The Brood"
+  },
+  {
+    "id": "grav-explosion-funnel",
+    "nameUk": "Воронка вибуху",
+    "region": "Смітник",
+    "anomalyType": "gravitational",
+    "worldX": 427879,
+    "worldY": 387765,
+    "nameEn": "Explosion Funnel"
+  },
+  {
+    "id": "chem-shelter-cave",
+    "nameUk": "Печера-сховок",
+    "region": "Дикий острів",
+    "anomalyType": "chemical",
+    "worldX": 498661,
+    "worldY": 510540,
+    "nameEn": "Shelter Cave"
+  },
+  {
+    "id": "grav-deaf-meadow-wi",
+    "nameUk": "Глуха лука",
+    "region": "Дикий острів",
+    "anomalyType": "gravitational",
+    "worldX": 510778,
+    "worldY": 528115,
+    "nameEn": "Deaf Meadow",
+    "notes": "Wild Island"
+  },
+  {
+    "id": "chem-hydrodynamics-lab",
+    "nameUk": "Гідродинамічна лабораторія",
+    "region": "Затон",
+    "anomalyType": "chemical",
+    "worldX": 731150,
+    "worldY": 539560,
+    "nameEn": "Hydrodynamics Lab",
+    "notes": "схід Затону"
+  },
+  {
+    "id": "chem-zaton-marshes",
+    "nameUk": "Марші",
+    "region": "Затон",
+    "anomalyType": "chemical",
+    "worldX": 696788,
+    "worldY": 652908,
+    "nameEn": "Marshes"
+  },
+  {
+    "id": "elec-canning-factory",
+    "nameUk": "Консервний завод",
+    "region": "Затон",
+    "anomalyType": "electro",
+    "worldX": 560887,
+    "worldY": 607711,
+    "nameEn": "Canning Factory"
+  },
+  {
+    "id": "therm-boiler",
+    "nameUk": "Котельня",
+    "region": "Затон",
+    "anomalyType": "thermal",
+    "worldX": 704478,
+    "worldY": 592451,
+    "nameEn": "Boiler"
+  },
+  {
+    "id": "therm-circus",
+    "nameUk": "Цирк",
+    "region": "Затон",
+    "anomalyType": "thermal",
+    "worldX": 763880,
+    "worldY": 665898,
+    "nameEn": "Circus"
+  },
+  {
+    "id": "therm-cave-network",
+    "nameUk": "Мережа печер",
+    "region": "Затон",
+    "anomalyType": "thermal",
+    "worldX": 642559,
+    "worldY": 575578,
+    "nameEn": "Cave Network"
+  },
+  {
+    "id": "grav-izumrudne",
+    "nameUk": "Ізумрудне",
+    "region": "Затон",
+    "anomalyType": "gravitational",
+    "worldX": 602876,
+    "worldY": 555179,
+    "nameEn": "Izumrudne"
+  },
+  {
+    "id": "grav-claw",
+    "nameUk": "Кіготь",
+    "region": "Затон",
+    "anomalyType": "gravitational",
+    "worldX": 637660,
+    "worldY": 558732,
+    "nameEn": "Claw"
+  },
+  {
+    "id": "chem-abandoned-hamlet",
+    "nameUk": "Покинутий хутір",
+    "region": "Болота",
+    "anomalyType": "chemical",
+    "worldX": 785812,
+    "worldY": 753281,
+    "nameEn": "Abandoned Hamlet"
+  },
+  {
+    "id": "therm-burnt-farmstead",
+    "nameUk": "Згорілий хутір",
+    "region": "Болота",
+    "anomalyType": "thermal",
+    "worldX": 736903,
+    "worldY": 711171,
+    "nameEn": "Burnt Farmstead"
+  },
+  {
+    "id": "therm-fishing-hamlet",
+    "nameUk": "Рибальський хутір",
+    "region": "Болота",
+    "anomalyType": "thermal",
+    "worldX": 769900,
+    "worldY": 731730,
+    "nameEn": "Fishing Hamlet"
+  },
+  {
+    "id": "elec-lonely-grave",
+    "nameUk": "Самотня могила",
+    "region": "Болота",
+    "anomalyType": "electro",
+    "worldX": 777083,
+    "worldY": 707395,
+    "nameEn": "Lonely Grave"
+  },
+  {
+    "id": "grav-trailer-camp",
+    "nameUk": "Табір трейлерів",
+    "region": "Болота",
+    "anomalyType": "gravitational",
+    "worldX": 715483,
+    "worldY": 705543,
+    "nameEn": "Trailer Camp"
+  },
+  {
+    "id": "grav-second-vanguard",
+    "nameUk": "Другий авангард",
+    "region": "Болота",
+    "anomalyType": "gravitational",
+    "worldX": 742047,
+    "worldY": 764919,
+    "nameEn": "Second Vanguard"
+  },
+  {
+    "id": "elec-scientist-helicopter",
+    "nameUk": "Вертоліт учених",
+    "region": "Росток",
+    "anomalyType": "electro",
+    "worldX": 280654,
+    "worldY": 425704,
+    "nameEn": "Scientist Helicopter"
+  },
+  {
+    "id": "grav-buryakivka",
+    "nameUk": "Буряківка",
+    "region": "Росток",
+    "anomalyType": "gravitational",
+    "worldX": 332905,
+    "worldY": 362658,
+    "nameEn": "Buryakivka"
+  },
+  {
+    "id": "therm-production-complex",
+    "nameUk": "Виробничий комплекс",
+    "region": "Янтар",
+    "anomalyType": "thermal",
+    "worldX": 210735,
+    "worldY": 381252,
+    "nameEn": "Production Complex"
+  },
+  {
+    "id": "grav-choppers-field",
+    "nameUk": "Поле вертольотів",
+    "region": "Янтар",
+    "anomalyType": "gravitational",
+    "worldX": 228195,
+    "worldY": 417831,
+    "nameEn": "Choppers Field"
+  },
+  {
+    "id": "chem-toxic-bog",
+    "nameUk": "Токсичне болото",
+    "region": "Хімзавод",
+    "anomalyType": "chemical",
+    "worldX": 241476,
+    "worldY": 513259,
+    "nameEn": "Toxic Bog"
+  },
+  {
+    "id": "chem-chemical-tanks",
+    "nameUk": "Хімічні резервуари",
+    "region": "Хімзавод",
+    "anomalyType": "chemical",
+    "worldX": 317747,
+    "worldY": 549863,
+    "nameEn": "Chemical Tanks"
+  },
+  {
+    "id": "therm-ahroprom-factory",
+    "nameUk": "Завод «Агропром»",
+    "region": "Хімзавод",
+    "anomalyType": "thermal",
+    "worldX": 257505,
+    "worldY": 464661,
+    "nameEn": "Ahroprom Factory",
+    "notes": "південь хімзаводу"
+  },
+  {
+    "id": "grav-promin-cmd",
+    "nameUk": "Завод «Промінь»",
+    "region": "Хімзавод",
+    "anomalyType": "gravitational",
+    "worldX": 190085,
+    "worldY": 515793,
+    "nameEn": "Promin CMD Factory"
+  },
+  {
+    "id": "grav-ne-chemical-plant",
+    "nameUk": "Схід хімзаводу",
+    "region": "Хімзавод",
+    "anomalyType": "gravitational",
+    "worldX": 320067,
+    "worldY": 501443,
+    "nameEn": "East of Chemical Plant",
+    "notes": "NE / south-east of Chemical Plant"
+  },
+  {
+    "id": "therm-conflagration",
+    "nameUk": "Пожежа",
+    "region": "Згорілий ліс",
+    "anomalyType": "thermal",
+    "worldX": 281900,
+    "worldY": 597271,
+    "nameEn": "Conflagration"
+  },
+  {
+    "id": "therm-cherevach",
+    "nameUk": "Черевач",
+    "region": "Згорілий ліс",
+    "anomalyType": "thermal",
+    "worldX": 321830,
+    "worldY": 597400,
+    "nameEn": "Cherevach"
+  },
+  {
+    "id": "therm-burning-rift",
+    "nameUk": "Палаючий розлом",
+    "region": "Згорілий ліс",
+    "anomalyType": "thermal",
+    "worldX": 254312,
+    "worldY": 626399,
+    "nameEn": "Burning Rift"
+  },
+  {
+    "id": "therm-helicopter-base",
+    "nameUk": "Гелікоптерна база",
+    "region": "Згорілий ліс",
+    "anomalyType": "thermal",
+    "worldX": 224816,
+    "worldY": 624203,
+    "nameEn": "Helicopter Base"
+  },
+  {
+    "id": "elec-malachite",
+    "nameUk": "НТЦ Малахіт",
+    "region": "Малахіт",
+    "anomalyType": "electro",
+    "worldX": 119852,
+    "worldY": 474050,
+    "nameEn": "STC Malachite"
+  },
+  {
+    "id": "therm-brain-scorcher",
+    "nameUk": "Випалювач мізків",
+    "region": "Малахіт",
+    "anomalyType": "thermal",
+    "worldX": 121842,
+    "worldY": 430651,
+    "nameEn": "Brain Scorcher"
+  },
+  {
+    "id": "therm-duga-substation",
+    "nameUk": "Підстанція Дуги",
+    "region": "Дуга",
+    "anomalyType": "thermal",
+    "worldX": 130252,
+    "worldY": 601973,
+    "nameEn": "Duga Substation"
+  },
+  {
+    "id": "elec-duga-commissary",
+    "nameUk": "Комісаріат",
+    "region": "Дуга",
+    "anomalyType": "electro",
+    "worldX": 162100,
+    "worldY": 650898,
+    "nameEn": "Commissary Store"
+  },
+  {
+    "id": "grav-duga-stadium",
+    "nameUk": "Шкільний стадіон",
+    "region": "Дуга",
+    "anomalyType": "gravitational",
+    "worldX": 188614,
+    "worldY": 670208,
+    "nameEn": "School Stadium"
+  },
+  {
+    "id": "chem-floodplain",
+    "nameUk": "Заплава",
+    "region": "Цементний завод",
+    "anomalyType": "chemical",
+    "worldX": 475416,
+    "worldY": 368496,
+    "nameEn": "Floodplain"
+  },
+  {
+    "id": "elec-reloading-point",
+    "nameUk": "Точка перезарядки",
+    "region": "Цементний завод",
+    "anomalyType": "electro",
+    "worldX": 479011,
+    "worldY": 400587,
+    "nameEn": "Reloading Point"
+  },
+  {
+    "id": "therm-hell",
+    "nameUk": "Пекло",
+    "region": "Цементний завод",
+    "anomalyType": "thermal",
+    "worldX": 520117,
+    "worldY": 379979,
+    "nameEn": "Hell"
+  },
+  {
+    "id": "grav-daredevil-path",
+    "nameUk": "Стежка відчайдуха",
+    "region": "Цементний завод",
+    "anomalyType": "gravitational",
+    "worldX": 482208,
+    "worldY": 446175,
+    "nameEn": "Daredevil Path"
+  },
+  {
+    "id": "chem-containers",
+    "nameUk": "Контейнери",
+    "region": "Рудий ліс",
+    "anomalyType": "chemical",
+    "worldX": 177652,
+    "worldY": 344841,
+    "nameEn": "Containers"
+  },
+  {
+    "id": "elec-witchs-circle",
+    "nameUk": "Відьмине коло",
+    "region": "Рудий ліс",
+    "anomalyType": "electro",
+    "worldX": 218149,
+    "worldY": 345872,
+    "nameEn": "Witch's Circle"
+  },
+  {
+    "id": "grav-symbiont",
+    "nameUk": "Симбіонт",
+    "region": "Рудий ліс",
+    "anomalyType": "gravitational",
+    "worldX": 248474,
+    "worldY": 315590,
+    "nameEn": "Symbiont"
+  },
+  {
+    "id": "grav-yaniv",
+    "nameUk": "Зрощені вагони",
+    "region": "Янів",
+    "anomalyType": "gravitational",
+    "worldX": 172924,
+    "worldY": 295050,
+    "nameEn": "Conjoined Wagons"
+  },
+  {
+    "id": "elec-jupiter",
+    "nameUk": "База ВСО",
+    "region": "Юпітер",
+    "anomalyType": "electro",
+    "worldX": 189919,
+    "worldY": 251848,
+    "nameEn": "WSD Base"
+  },
+  {
+    "id": "grav-market",
+    "nameUk": "Ринок",
+    "region": "Юпітер",
+    "anomalyType": "gravitational",
+    "worldX": 258839,
+    "worldY": 250181,
+    "nameEn": "Market"
+  },
+  {
+    "id": "chem-sunny-kindergarten",
+    "nameUk": "Дитячий садок «Сонечко»",
+    "region": "Прип'ять",
+    "anomalyType": "chemical",
+    "worldX": 263543,
+    "worldY": 180393,
+    "nameEn": "Sunny Kindergarten"
+  },
+  {
+    "id": "elec-bumper-cars",
+    "nameUk": "Автодроми",
+    "region": "Прип'ять",
+    "anomalyType": "electro",
+    "worldX": 227735,
+    "worldY": 147504,
+    "nameEn": "Bumper Cars",
+    "notes": "West of Ferris Wheel / Bumper Cars"
+  },
+  {
+    "id": "therm-pripyat-mall",
+    "nameUk": "Торговий центр",
+    "region": "Прип'ять",
+    "anomalyType": "thermal",
+    "worldX": 232063,
+    "worldY": 165265,
+    "nameEn": "Shopping Mall"
+  },
+  {
+    "id": "therm-pripyat-stadium",
+    "nameUk": "Шкільний стадіон",
+    "region": "Прип'ять",
+    "anomalyType": "thermal",
+    "worldX": 278059,
+    "worldY": 167802,
+    "nameEn": "School Stadium"
+  },
+  {
+    "id": "grav-music-school",
+    "nameUk": "Музична школа",
+    "region": "Прип'ять",
+    "anomalyType": "gravitational",
+    "worldX": 266531,
+    "worldY": 147989,
+    "nameEn": "Music School"
+  },
+  {
+    "id": "therm-cooling-towers",
+    "nameUk": "Палаюче депо",
+    "region": "Градирні",
+    "anomalyType": "thermal",
+    "worldX": 501299,
+    "worldY": 347614,
+    "nameEn": "Burning Fire Depot"
+  }
+]
