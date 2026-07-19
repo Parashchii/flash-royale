@@ -28,3 +28,8 @@ dist-ssr
 
 # Convex
 .convex
+
+# Vercel
+.vercel
+.env*
+!.env.example
