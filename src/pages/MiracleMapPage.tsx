@@ -21,7 +21,7 @@ import {
   worldToLatLng,
 } from "../lib/mapCoords";
 import { useLocale } from "../i18n/LocaleContext";
-import { anomalyTypeLabel, locName } from "../i18n/localize";
+import { anomalyTypeLabel, locName, locRegion } from "../i18n/localize";
 
 function markerHtml(worth: boolean, approx: boolean): string {
   const tone = worth ? "worth" : "done";
@@ -229,12 +229,11 @@ export function MiracleMapPage() {
             </h2>
             <p className="flash-meta">
               {anomalyTypeLabel(selected.anomalyType, locale)} ·{" "}
-              {selected.region}
-              {selected.coordApprox ? " · орієнтовні координати" : ""}
+              {locRegion(selected, locale)}
+              {selected.coordApprox ? ` · ${t("approxCoords")}` : ""}
             </p>
             <p className="notes">
-              {selectedProg.got}/{selectedProg.total} артефактів цього типу
-              зібрано
+              {selectedProg.got}/{selectedProg.total} {t("typeProgressAfter")}
             </p>
             {selected.notes && <p className="notes">{selected.notes}</p>}
           </aside>

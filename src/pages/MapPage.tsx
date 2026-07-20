@@ -19,14 +19,12 @@ import {
   worldToLatLng,
 } from "../lib/mapCoords";
 import { useLocale } from "../i18n/LocaleContext";
+import { locField, locName, locRegion, locUpgrade } from "../i18n/localize";
 
 type StatusFilter = "all" | "missing" | "collected" | "locked" | "locked_missed";
 
-/** Verified platform note for the НДІЧАЗ save-reload trick. */
-const QUEST_ONLY_VERIFY = {
-  dateUk: "15 липня 2026",
-  patch: "1.010",
-};
+/** Verified platform note for the SIRCAA save-reload trick. */
+const QUEST_ONLY_PATCH = "1.010";
 
 function isDuplicateLocation(f: FlashDrive): boolean {
   return allLocationsForKey(f.blueprintKey).length > 1;
@@ -55,7 +53,7 @@ function markerHtml(
 }
 
 export function MapPage() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { collectedKeys, choices, toggleCollected } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -239,23 +237,31 @@ export function MapPage() {
               type="button"
               className="sheet-close"
               onClick={closeSheet}
-              aria-label="Закрити"
+              aria-label={t("close")}
             >
               ×
             </button>
-            <h2>{selected.nameUk}</h2>
+            <h2 className="sheet-title">
+              {locName(selected, locale)}
+              <span className="sheet-title-en">
+                {locale === "uk" ? selected.nameEn : selected.nameUk}
+              </span>
+            </h2>
             <p className="flash-meta">
-              {gearById[selected.gearId]?.nameUk} · {selected.region}
-              {selected.coordApprox ? " · орієнтовні координати" : ""}
+              {gearById[selected.gearId]
+                ? locName(gearById[selected.gearId], locale)
+                : selected.gearId}{" "}
+              · {locRegion(selected, locale)}
+              {selected.coordApprox ? ` · ${t("approxCoords")}` : ""}
             </p>
             {selected.questOnly && (
-              <span className="quest-only-badge">Лише через квест НДІЧАЗ</span>
+              <span className="quest-only-badge">{t("questOnlyBadge")}</span>
             )}
             {isDuplicateLocation(selected) && (
               <span className="dup-badge">
-                Дублікат ·{" "}
+                {t("duplicateBadge")} ·{" "}
                 {allLocationsForKey(selected.blueprintKey)
-                  .map((a) => a.region)
+                  .map((a) => locRegion(a, locale))
                   .join(" / ")}
               </span>
             )}
@@ -265,12 +271,26 @@ export function MapPage() {
             {selected.lock && (
               <>
                 <span className="lock-badge">
-                  Сюжет / можна пропустити
-                  {selected.lock.questUk ? ` · ${selected.lock.questUk}` : ""}
+                  {t("statusLocked")}
+                  {selected.lock.questUk
+                    ? ` · ${locField(selected.lock.questUk, selected.lock.questEn, locale)}`
+                    : ""}
                 </span>
-                <p className="lock-summary">{selected.lock.summaryUk}</p>
+                <p className="lock-summary">
+                  {locField(
+                    selected.lock.summaryUk,
+                    selected.lock.summaryEn,
+                    locale,
+                  )}
+                </p>
                 {spoilers && (
-                  <p className="lock-detail">{selected.lock.detailUk}</p>
+                  <p className="lock-detail">
+                    {locField(
+                      selected.lock.detailUk,
+                      selected.lock.detailEn,
+                      locale,
+                    )}
+                  </p>
                 )}
               </>
             )}
@@ -279,14 +299,14 @@ export function MapPage() {
                 <p>{selected.notes}</p>
                 <div className="platform-tags">
                   <span className="platform-tag platform-ok">
-                    Працює на PS5 станом на {QUEST_ONLY_VERIFY.dateUk}, патч{" "}
-                    {QUEST_ONLY_VERIFY.patch}
+                    {t("platformOkPrefix")} {t("verifyDate")},{" "}
+                    {t("platformOkPatch")} {QUEST_ONLY_PATCH}
                   </span>
                   <span className="platform-tag platform-unverified">
-                    Не перевірено на PC
+                    {t("platformPcNo")}
                   </span>
                   <span className="platform-tag platform-unverified">
-                    Не перевірено на Xbox
+                    {t("platformXboxNo")}
                   </span>
                 </div>
               </div>
@@ -295,9 +315,7 @@ export function MapPage() {
               <p className="notes">{selected.notes}</p>
             )}
             {statusOf(selected, collectedKeys, choices) === "locked_missed" && (
-              <p className="ps5-miss">
-                Заблоковано вибором. На PS5 — інший сейв або нове проходження.
-              </p>
+              <p className="ps5-miss">{t("lockedMissedNote")}</p>
             )}
             <label className="flash-check compact sheet-check">
               <input
@@ -305,17 +323,17 @@ export function MapPage() {
                 checked={collectedKeys.has(selected.blueprintKey)}
                 onChange={() => toggleCollected(selected.blueprintKey)}
               />
-              <span>Зібрано</span>
+              <span>{t("statusCollected")}</span>
             </label>
             <div className="choice-actions">
               <Link
                 className="btn btn-ghost"
-                to={`/flash-royale/list?q=${encodeURIComponent(selected.upgradeUk)}`}
+                to={`/flash-royale/list?q=${encodeURIComponent(locUpgrade(selected, locale))}`}
               >
-                У списку
+                {t("inList")}
               </Link>
               <Link className="btn btn-ghost" to="/flash-royale/overview#pda-check">
-                Огляд
+                {t("overview")}
               </Link>
             </div>
           </aside>

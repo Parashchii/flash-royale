@@ -203,8 +203,7 @@ export function ArchMapPage() {
             </p>
             {selected.conditionUk && (
               <p className="notes">
-                <strong>{locale === "uk" ? "Умова:" : "Condition:"}</strong>{" "}
-                {selected.conditionUk}
+                <strong>{t("conditionLabel")}:</strong> {selected.conditionUk}
               </p>
             )}
             <p className="notes">{selected.accessUk}</p>
@@ -215,13 +214,7 @@ export function ArchMapPage() {
                 className="btn"
                 onClick={() => toggleArchArtifact(selected.id)}
               >
-                {selectedGot
-                  ? locale === "uk"
-                    ? "Зняти позначку"
-                    : "Unmark"
-                  : locale === "uk"
-                    ? "Позначити зібраним"
-                    : "Mark collected"}
+                {selectedGot ? t("unmarkCollected") : t("markCollected")}
               </button>
               <Link
                 className="btn btn-ghost"

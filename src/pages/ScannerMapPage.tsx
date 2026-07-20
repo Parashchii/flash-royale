@@ -13,6 +13,7 @@ import {
   worldToLatLng,
 } from "../lib/mapCoords";
 import { useLocale } from "../i18n/LocaleContext";
+import { locField, locName, locPoi, locRegion } from "../i18n/localize";
 
 type StatusFilter = "all" | "missing" | "collected";
 
@@ -23,7 +24,7 @@ function markerHtml(got: boolean): string {
 }
 
 export function ScannerMapPage() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { collectedScannerIds, toggleScanner } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -192,18 +193,25 @@ export function ScannerMapPage() {
               ×
             </button>
             <h2 className="sheet-title">
-              {selected.nameUk}
-              <span className="sheet-title-en">{selected.nameEn}</span>
+              {locName(selected, locale)}
+              <span className="sheet-title-en">
+                {locale === "uk" ? selected.nameEn : selected.nameUk}
+              </span>
             </h2>
             <p className="flash-meta">
-              {selected.region} · {selected.poiUk}
+              {locRegion(selected, locale)} · {locPoi(selected, locale)}
             </p>
             <p className="notes">
-              Артефакт: {selected.artifactNameUk} ({selected.artifactNameEn})
+              {t("artifactLabel")}:{" "}
+              {locField(
+                selected.artifactNameUk,
+                selected.artifactNameEn,
+                locale,
+              )}
             </p>
             {selected.conditionUk && (
               <p className="notes">
-                <strong>Умова:</strong> {selected.conditionUk}
+                <strong>{t("conditionLabel")}:</strong> {selected.conditionUk}
               </p>
             )}
             <p className="notes">{selected.accessUk}</p>
@@ -214,11 +222,11 @@ export function ScannerMapPage() {
                 className="btn"
                 onClick={() => toggleScanner(selected.id)}
               >
-                {selectedGot ? "Зняти позначку" : "Позначити зібраним"}
+                {selectedGot ? t("unmarkCollected") : t("markCollected")}
               </button>
               <Link
                 className="btn btn-ghost"
-                to={`/scanning-complete/list?q=${encodeURIComponent(selected.region)}`}
+                to={`/scanning-complete/list?q=${encodeURIComponent(locRegion(selected, locale))}`}
               >
                 {t("inList")}
               </Link>

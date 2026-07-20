@@ -21,9 +21,12 @@ export type Gear = {
 export type FlashLock = {
   kind: "story" | "choice" | "quest";
   summaryUk: string;
+  summaryEn?: string;
   detailUk: string;
+  detailEn?: string;
   choiceKey?: ChoiceKey | null;
   questUk?: string | null;
+  questEn?: string | null;
 };
 
 export type FlashDrive = {
@@ -169,5 +172,29 @@ export const CHOICE_LABELS: Record<
     yes: "Допоміг Девʼятому",
     no: "Не допомагав / інший вибір",
     help: "Потрібно для «M10 Gordon: Гумовий шар».",
+  },
+};
+
+export const CHOICE_LABELS_EN: Record<
+  ChoiceKey,
+  { title: string; yes: string; no: string; help: string }
+> = {
+  spark: {
+    title: "SIRCAA — Spark side",
+    yes: "Chose Spark",
+    no: "Did not choose Spark",
+    help: "Required for the Zubr-19 Anatomical Adjustment flash drive on Duga.",
+  },
+  polissya: {
+    title: "Route via Polissya",
+    yes: "Going through Polissya",
+    no: "Another route",
+    help: "Required for Saiga D-12 Stock Rebalance.",
+  },
+  ninth: {
+    title: "The Lost Boys quest — The Ninth",
+    yes: "Helped The Ninth",
+    no: "Did not help / other choice",
+    help: "Required for M10 Gordon Rubber Layer.",
   },
 };

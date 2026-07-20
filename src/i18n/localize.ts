@@ -9,6 +9,13 @@ export function locName(
   return locale === "uk" ? item.nameUk : item.nameEn;
 }
 
+export function locUpgrade(
+  item: { upgradeUk: string; upgradeEn: string },
+  locale: Locale,
+): string {
+  return locale === "uk" ? item.upgradeUk : item.upgradeEn;
+}
+
 export function locRegion(
   item: { region: string; regionEn?: string },
   locale: Locale,
@@ -24,9 +31,17 @@ export function locAnomaly(
   return locale === "uk" ? item.anomalyUk : item.anomalyEn;
 }
 
+export function locPoi(
+  item: { poiUk: string; poiEn?: string },
+  locale: Locale,
+): string {
+  if (locale === "en" && item.poiEn) return item.poiEn;
+  return item.poiUk;
+}
+
 export function locField(
   uk: string,
-  en: string | undefined,
+  en: string | undefined | null,
   locale: Locale,
 ): string {
   return locale === "en" && en ? en : uk;

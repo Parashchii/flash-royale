@@ -12,9 +12,12 @@
     "lock": {
       "kind": "quest",
       "summaryUk": "Нагорода квесту «Потеряні хлопці» (допомогти Девʼятому)",
+      "summaryEn": "Reward from The Lost Boys quest (help The Ninth)",
       "detailUk": "Побічний квест у Малій Зоні: треба допомогти монолітівцю Девʼятому, щоб отримати креслення.",
+      "detailEn": "Side quest in the Lesser Zone: help the Monolithian The Ninth to get the blueprint.",
       "choiceKey": "ninth",
-      "questUk": "Потеряні хлопці"
+      "questUk": "Потеряні хлопці",
+      "questEn": "The Lost Boys"
     },
     "worldX": 412334,
     "worldY": 357792,
@@ -34,9 +37,12 @@
     "lock": {
       "kind": "story",
       "summaryUk": "Дублікат креслення Integral-A (також є в НДІЧАЗ)",
+      "summaryEn": "Duplicate Integral-A blueprint (also at SIRCAA)",
       "detailUk": "Те саме креслення, що й сюжетне в НДІЧАЗ. Достатньо зібрати один із двох екземплярів — але надійніше взяти обидва. Не плутати з таким самим апгрейдом для «Гвинтаря» на Затоні.",
+      "detailEn": "Same blueprint as the story one at SIRCAA. One of the two is enough — but safer to grab both. Don’t confuse it with the same upgrade for Gvyntar on Zaton.",
       "choiceKey": null,
-      "questUk": "Ціна зростає"
+      "questUk": "Ціна зростає",
+      "questEn": "The Price of Rising"
     },
     "worldX": 388418,
     "worldY": 439659,
@@ -132,9 +138,12 @@
     "lock": {
       "kind": "story",
       "summaryUk": "Сюжетна локація НДІЧАЗ — без квесту не дістатися",
+      "summaryEn": "SIRCAA story location — unreachable without the quest",
       "detailUk": "Під час втечі з НДІЧАЗ — у рюкзаку під сходами на нижньому поверсі Data Center / будівлі сюжетної флешки. Той самий креслення також є на ГЕС Смітника. На PS5 пропуск = інший сейв / нове проходження, якщо не зібрали дублікат.",
+      "detailEn": "During the escape from SIRCAA — in a backpack under the stairs on the lower floor of the Data Center / story flash drive building. The same blueprint is also at the Garbage HEP. On PS5, missing it means another save / new playthrough unless you grabbed the duplicate.",
       "choiceKey": null,
-      "questUk": "Втеча з НДІЧАЗ"
+      "questUk": "Втеча з НДІЧАЗ",
+      "questEn": "Escape from SIRCAA"
     },
     "worldX": 666996,
     "worldY": 456130,
@@ -440,9 +449,12 @@
     "lock": {
       "kind": "choice",
       "summaryUk": "Лише якщо на НДІЧАЗ обрали бік «Іскра»",
+      "summaryEn": "Only if you sided with Spark at SIRCAA",
       "detailUk": "У тунелях під Дугою під час «Щастя для всіх» (сейф під радіорубкою). Доступно лише після вибору сторони «Іскра» на НДІЧАЗ.",
+      "detailEn": "In the tunnels under Duga during Happiness for Everyone (safe under the radio booth). Available only after choosing Spark at SIRCAA.",
       "choiceKey": "spark",
-      "questUk": "Щастя для всіх"
+      "questUk": "Щастя для всіх",
+      "questEn": "Happiness for Everyone"
     },
     "worldX": 158169,
     "worldY": 631240,
@@ -882,9 +894,12 @@
     "lock": {
       "kind": "choice",
       "summaryUk": "Маршрут через готель «Полісся» (точка неповернення)",
+      "summaryEn": "Route via Hotel Polissya (point of no return)",
       "detailUk": "Креслення біля / під готелем «Полісся». Доступне, якщо в розмові з Дегтярьовим обрали шлях через «Полісся». На PS5 пропуск майже завжди означає нове проходження.",
+      "detailEn": "Blueprint near / under Hotel Polissya. Available if you chose the Polissya path when talking to Degtyarev. On PS5, missing it almost always means a new playthrough.",
       "choiceKey": "polissya",
-      "questUk": "Дорога до «Фундаменту» / Полісся"
+      "questUk": "Дорога до «Фундаменту» / Полісся",
+      "questEn": "The Road to the Foundation / Polissya"
     },
     "worldX": 248210,
     "worldY": 153371,

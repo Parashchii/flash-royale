@@ -35,7 +35,8 @@ type UnifiedMarker = {
   worldY: number;
   titleUk: string;
   titleEn: string;
-  meta: string;
+  metaUk: string;
+  metaEn: string;
   detail?: string;
   done: boolean;
   mapHref: string;
@@ -103,7 +104,8 @@ export function AllMapPage() {
         worldY: f.worldY,
         titleUk: f.nameUk,
         titleEn: f.nameEn,
-        meta: `${f.region} · флешка`,
+        metaUk: `${f.region} · флешка`,
+        metaEn: `${f.regionEn || f.region} · flash drive`,
         detail: f.accessUk,
         done,
         mapHref: `/flash-royale?id=${f.id}`,
@@ -120,7 +122,8 @@ export function AllMapPage() {
         worldY: f.worldY,
         titleUk: f.nameUk,
         titleEn: f.nameEn,
-        meta: `${f.region} · поле аномалії`,
+        metaUk: `${f.region} · поле аномалії`,
+        metaEn: `${f.region} · anomaly field`,
         detail: f.notes,
         done: !worth,
         mapHref: `/miracle-hoarder?id=${f.id}`,
@@ -137,7 +140,8 @@ export function AllMapPage() {
         worldY: s.worldY,
         titleUk: s.nameUk,
         titleEn: s.nameEn,
-        meta: `${s.region} · сканер · ${s.artifactNameUk}`,
+        metaUk: `${s.region} · сканер · ${s.artifactNameUk}`,
+        metaEn: `${s.regionEn || s.region} · scanner · ${s.artifactNameEn}`,
         detail: s.accessUk,
         done,
         mapHref: `/scanning-complete?id=${s.id}`,
@@ -154,7 +158,8 @@ export function AllMapPage() {
         worldY: a.worldY,
         titleUk: a.nameUk,
         titleEn: a.nameEn,
-        meta: `${a.region} · ${a.anomalyUk}`,
+        metaUk: `${a.region} · ${a.anomalyUk}`,
+        metaEn: `${a.regionEn || a.region} · ${a.anomalyEn}`,
         detail: a.accessUk,
         done,
         mapHref: `/curiouser-curiouser?id=${a.id}`,
@@ -339,7 +344,8 @@ export function AllMapPage() {
               </span>
             </h2>
             <p className="flash-meta">
-              {locName(ACHIEVEMENTS[selected.layer], locale)} · {selected.meta}
+              {locName(ACHIEVEMENTS[selected.layer], locale)} ·{" "}
+              {locale === "uk" ? selected.metaUk : selected.metaEn}
               {selected.done ? t("allMapDoneSuffix") : ""}
             </p>
             {selected.detail && <p className="notes">{selected.detail}</p>}
