@@ -12,6 +12,8 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { useLocale } from "../i18n/LocaleContext";
+import { locAnomaly, locName, locRegion } from "../i18n/localize";
 
 type StatusFilter = "all" | "missing" | "collected";
 
@@ -22,6 +24,7 @@ function markerHtml(got: boolean): string {
 }
 
 export function ArchMapPage() {
+  const { t, locale } = useLocale();
   const { collectedArchArtifactIds, toggleArchArtifact } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -192,15 +195,18 @@ export function ArchMapPage() {
               ×
             </button>
             <h2 className="sheet-title">
-              {selected.nameUk}
-              <span className="sheet-title-en">{selected.nameEn}</span>
+              {locName(selected, locale)}
+              <span className="sheet-title-en">
+                {locale === "uk" ? selected.nameEn : selected.nameUk}
+              </span>
             </h2>
             <p className="flash-meta">
-              {selected.region} · {selected.anomalyUk} ({selected.anomalyEn})
+              {locRegion(selected, locale)} · {locAnomaly(selected, locale)}
             </p>
             {selected.conditionUk && (
               <p className="notes">
-                <strong>Умова:</strong> {selected.conditionUk}
+                <strong>{locale === "uk" ? "Умова:" : "Condition:"}</strong>{" "}
+                {selected.conditionUk}
               </p>
             )}
             <p className="notes">{selected.accessUk}</p>
@@ -211,13 +217,19 @@ export function ArchMapPage() {
                 className="btn"
                 onClick={() => toggleArchArtifact(selected.id)}
               >
-                {selectedGot ? "Зняти позначку" : "Позначити зібраним"}
+                {selectedGot
+                  ? locale === "uk"
+                    ? "Зняти позначку"
+                    : "Unmark"
+                  : locale === "uk"
+                    ? "Позначити зібраним"
+                    : "Mark collected"}
               </button>
               <Link
                 className="btn btn-ghost"
-                to={`/curiouser-curiouser/list?q=${encodeURIComponent(selected.nameUk)}`}
+                to={`/curiouser-curiouser/list?q=${encodeURIComponent(locName(selected, locale))}`}
               >
-                У списку
+                {t("listTitle")}
               </Link>
             </div>
           </aside>

@@ -4,13 +4,14 @@ import {
   TOTAL_ARTIFACTS,
   artifactTypeProgress,
 } from "../data/catalog";
-import {
-  ANOMALY_TYPE_LABELS,
-  ANOMALY_TYPES,
-} from "../data/types";
+import { ACHIEVEMENTS } from "../data/achievements";
+import { ANOMALY_TYPES } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
+import { useLocale } from "../i18n/LocaleContext";
+import { anomalyTypeLabel, locName } from "../i18n/localize";
 
 export function MiracleOverviewPage() {
+  const { t, locale } = useLocale();
   const { collectedArtifactIds } = useProgress();
   const done = collectedArtifactIds.size;
   const pct = TOTAL_ARTIFACTS
@@ -20,16 +21,19 @@ export function MiracleOverviewPage() {
     () => artifactTypeProgress(collectedArtifactIds),
     [collectedArtifactIds],
   );
+  const achName = locName(ACHIEVEMENTS["miracle-hoarder"], locale);
 
   return (
     <div className="page home">
       <header className="hero-home">
         <p className="lede">
-          Трекер усіх артефактів для досягнення Miracle Hoarder (Збирач див).
+          {locale === "uk"
+            ? `Трекер усіх артефактів для досягнення ${achName}.`
+            : `Tracker for all artifacts for the ${achName} achievement.`}
         </p>
         <div
           className="big-progress"
-          aria-label={`Прогрес ${done} з ${TOTAL_ARTIFACTS}`}
+          aria-label={`${done} / ${TOTAL_ARTIFACTS}`}
         >
           <div className="big-progress-bar" style={{ width: `${pct}%` }} />
           <span>
@@ -39,7 +43,9 @@ export function MiracleOverviewPage() {
       </header>
 
       <section className="overview-section" aria-labelledby="types-title">
-        <h2 id="types-title">За типами аномалій</h2>
+        <h2 id="types-title">
+          {locale === "uk" ? "За типами аномалій" : "By anomaly type"}
+        </h2>
         <ul className="mh-type-status">
           {ANOMALY_TYPES.map((type) => {
             const p = typeProgress[type];
@@ -47,17 +53,23 @@ export function MiracleOverviewPage() {
             return (
               <li key={type} className={complete ? "done" : "open"}>
                 <div>
-                  <strong>{ANOMALY_TYPE_LABELS[type]}</strong>
+                  <strong>{anomalyTypeLabel(type, locale)}</strong>
                   <span>
                     {p.got}/{p.total}
-                    {complete ? " · тип закрито" : " · ще фармити"}
+                    {complete
+                      ? locale === "uk"
+                        ? " · тип закрито"
+                        : " · type complete"
+                      : locale === "uk"
+                        ? " · ще фармити"
+                        : " · still farming"}
                   </span>
                 </div>
                 <Link
                   className="btn btn-ghost"
                   to={`/miracle-hoarder?type=${type}`}
                 >
-                  Мапа
+                  {t("map")}
                 </Link>
               </li>
             );

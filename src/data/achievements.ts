@@ -53,8 +53,8 @@ export const ACHIEVEMENTS: Record<AchievementId, AchievementMeta> = {
   "show-all": {
     id: "show-all",
     nameEn: "Show all",
-    nameUk: "показати всі",
-    brandLabel: "Show all (показати всі)",
+    nameUk: "Показати всі",
+    brandLabel: "Show all",
     totalItems:
       TOTAL_UNIQUE + TOTAL_ARTIFACTS + TOTAL_SCANNERS + TOTAL_ARCH_ARTIFACTS,
   },

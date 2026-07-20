@@ -12,6 +12,7 @@ import {
   swapAchievementPath,
   useAchievementOptional,
 } from "../hooks/useAchievement";
+import { useLocale } from "../i18n/LocaleContext";
 
 const SHOW_ALL = ACHIEVEMENTS["show-all"];
 const ACHIEVEMENT_OPTIONS = ACHIEVEMENT_LIST.filter((a) => a.id !== "show-all");
@@ -25,6 +26,9 @@ function OptionButton({
   selected: boolean;
   onPick: (id: AchievementId) => void;
 }) {
+  const { locale } = useLocale();
+  const primary = locale === "uk" ? achievement.nameUk : achievement.nameEn;
+  const secondary = locale === "uk" ? achievement.nameEn : achievement.nameUk;
   return (
     <button
       type="button"
@@ -33,16 +37,19 @@ function OptionButton({
       }
       onClick={() => onPick(achievement.id)}
     >
-      <span className="achievement-option-en">{achievement.nameEn}</span>
-      <span className="achievement-option-uk">({achievement.nameUk})</span>
+      <span className="achievement-option-en">{primary}</span>
+      <span className="achievement-option-uk">({secondary})</span>
     </button>
   );
 }
 
 export function AchievementSwitcher() {
   const ctx = useAchievementOptional();
+  const { locale } = useLocale();
   const achievementId = ctx?.achievementId ?? DEFAULT_ACHIEVEMENT;
   const achievement = ctx?.achievement ?? ACHIEVEMENTS[DEFAULT_ACHIEVEMENT];
+  const brandLabel =
+    locale === "uk" ? achievement.nameUk : achievement.nameEn;
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
     null,
@@ -151,7 +158,7 @@ export function AchievementSwitcher() {
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <span className="achievement-switcher-label">{achievement.brandLabel}</span>
+        <span className="achievement-switcher-label">{brandLabel}</span>
         <span className="achievement-switcher-chevron" aria-hidden="true">
           ▾
         </span>

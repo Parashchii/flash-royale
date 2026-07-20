@@ -10,6 +10,7 @@ import {
   UNIQUE_BLUEPRINT_KEYS,
   missingArtifactTypes,
 } from "../data/catalog";
+import { ACHIEVEMENTS } from "../data/achievements";
 import { useProgress } from "../hooks/useProgress";
 import {
   MAP_BOUNDS,
@@ -18,6 +19,8 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { useLocale } from "../i18n/LocaleContext";
+import { locName } from "../i18n/localize";
 
 type LayerId =
   | "flash-royale"
@@ -39,13 +42,6 @@ type UnifiedMarker = {
   html: string;
 };
 
-const LAYER_LABELS: Record<LayerId, string> = {
-  "flash-royale": "Flash Royale",
-  "miracle-hoarder": "Miracle Hoarder",
-  "scanning-complete": "Scanning Complete",
-  "curiouser-curiouser": "Curiouser",
-};
-
 function wrapClass(layer: LayerId): string {
   if (layer === "flash-royale") return "fr-marker-wrap";
   if (layer === "miracle-hoarder") return "mh-marker-wrap";
@@ -54,6 +50,7 @@ function wrapClass(layer: LayerId): string {
 }
 
 export function AllMapPage() {
+  const { locale } = useLocale();
   const {
     collectedKeys,
     collectedArtifactIds,
@@ -62,6 +59,13 @@ export function AllMapPage() {
   } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
+
+  const layerIds = [
+    "flash-royale",
+    "miracle-hoarder",
+    "scanning-complete",
+    "curiouser-curiouser",
+  ] as const;
 
   const [layers, setLayers] = useState<Record<LayerId, boolean>>({
     "flash-royale": true,
@@ -329,11 +333,13 @@ export function AllMapPage() {
               ×
             </button>
             <h2 className="sheet-title">
-              {selected.titleUk}
-              <span className="sheet-title-en">{selected.titleEn}</span>
+              {locale === "uk" ? selected.titleUk : selected.titleEn}
+              <span className="sheet-title-en">
+                {locale === "uk" ? selected.titleEn : selected.titleUk}
+              </span>
             </h2>
             <p className="flash-meta">
-              {LAYER_LABELS[selected.layer]} · {selected.meta}
+              {locName(ACHIEVEMENTS[selected.layer], locale)} · {selected.meta}
               {selected.done ? " · зібрано / закрито" : ""}
             </p>
             {selected.detail && <p className="notes">{selected.detail}</p>}
@@ -348,14 +354,14 @@ export function AllMapPage() {
 
       <div className="map-filters-card">
         <div className="filters map-filters all-map-layers" role="group" aria-label="Шари">
-          {(Object.keys(LAYER_LABELS) as LayerId[]).map((id) => (
+          {layerIds.map((id) => (
             <label key={id} className="check-label">
               <input
                 type="checkbox"
                 checked={layers[id]}
                 onChange={() => toggleLayer(id)}
               />
-              {LAYER_LABELS[id]}
+              {locName(ACHIEVEMENTS[id], locale)}
             </label>
           ))}
         </div>

@@ -3,6 +3,7 @@ import { AppShell } from "./components/AppShell";
 import { ProgressProvider } from "./hooks/useProgress";
 import { AchievementProvider } from "./hooks/useAchievement";
 import { HomePage } from "./pages/HomePage";
+import { LandingPage } from "./pages/LandingPage";
 import { FlashdrivesPage } from "./pages/FlashdrivesPage";
 import { DataPage } from "./pages/DataPage";
 import { MapPage } from "./pages/MapPage";
@@ -62,6 +63,14 @@ export default function App() {
     <ProgressProvider>
       <BrowserRouter>
         <Routes>
+          <Route
+            path="/"
+            element={
+              <AppShell>
+                <LandingPage />
+              </AppShell>
+            }
+          />
           <Route path="/data" element={<AppShell><DataPage /></AppShell>} />
 
           <Route path="/:achievementId" element={<AchievementLayout />}>
@@ -75,8 +84,7 @@ export default function App() {
           <Route path="/map" element={<Navigate to="/flash-royale" replace />} />
           <Route path="/pda" element={<Navigate to="/flash-royale/overview#pda-check" replace />} />
           <Route path="/choices" element={<Navigate to="/flash-royale/overview" replace />} />
-          <Route path="/" element={<Navigate to="/flash-royale" replace />} />
-          <Route path="*" element={<Navigate to="/flash-royale" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </ProgressProvider>

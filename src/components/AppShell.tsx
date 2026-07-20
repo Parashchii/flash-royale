@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation, useParams } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation, useParams } from "react-router-dom";
 import {
   TOTAL_ARCH_ARTIFACTS,
   TOTAL_ARTIFACTS,
@@ -12,22 +12,23 @@ import {
 } from "../data/achievements";
 import { authConfigured, useProgress } from "../hooks/useProgress";
 import { useAchievementOptional } from "../hooks/useAchievement";
+import { useLocale } from "../i18n/LocaleContext";
 import { AuthControls } from "./AuthControls";
 import { AchievementSwitcher } from "./AchievementSwitcher";
+import { LangSwitcher } from "./LangSwitcher";
+import { ProfileMenu } from "./ProfileMenu";
 import radiationLogo from "../assets/radiation-logo.png";
 
 function useNavLinks(achievementId: AchievementId) {
+  const { t } = useLocale();
   if (achievementId === "show-all") {
-    return [
-      { to: `/${achievementId}`, label: "Мапа", end: true },
-      { to: "/data", label: "Дані" },
-    ];
+    return [];
   }
   return [
-    { to: `/${achievementId}`, label: "Мапа", end: true },
-    { to: `/${achievementId}/list`, label: "Список" },
-    { to: `/${achievementId}/overview`, label: "Огляд" },
-    { to: "/data", label: "Дані" },
+    { to: `/${achievementId}`, label: t("navMap"), end: true },
+    { to: `/${achievementId}/list`, label: t("navList") },
+    { to: `/${achievementId}/overview`, label: t("navOverview") },
+    { to: "/data", label: t("navData") },
   ];
 }
 
@@ -74,11 +75,13 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
     collectedArtifactIds,
     collectedScannerIds,
     collectedArchArtifactIds,
-    mode,
   } = useProgress();
   const location = useLocation();
   const params = useParams();
   const achCtx = useAchievementOptional();
+  const { t } = useLocale();
+
+  const isHome = location.pathname === "/";
 
   const achievementId: AchievementId = achCtx?.achievementId
     ?? (isAchievementId(params.achievementId) ? params.achievementId : "flash-royale");
@@ -94,56 +97,61 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
   );
 
   return (
-    <div className="app">
+    <div className={isHome ? "app app-home" : "app"}>
       <header className="topbar">
         <div className="brand-block">
-          <img
-            className="brand-logo"
-            src={radiationLogo}
-            alt=""
-            width={36}
-            height={36}
-          />
-          <div className="brand-text">
-            <div className="brand">
-              <span className="brand-primary">Stalker 2 Achievements</span>
-              <span className="brand-sep"> | </span>
-              <AchievementSwitcher />
+          <Link to="/" className="brand-home-link" aria-label={t("navHome")}>
+            <img
+              className="brand-logo"
+              src={radiationLogo}
+              alt=""
+              width={36}
+              height={36}
+            />
+          </Link>
+          {!isHome ? (
+            <div className="brand-text">
+              <div className="brand">
+                <Link to="/" className="brand-primary">
+                  {t("brandTitle")}
+                </Link>
+                <span className="brand-sep"> | </span>
+                <AchievementSwitcher />
+              </div>
+              <p className="progress-pill">
+                {Math.min(done, total)} / {total}
+              </p>
             </div>
-            <p className="progress-pill">
-              {Math.min(done, total)} / {total}
-            </p>
-          </div>
+          ) : null}
         </div>
         <div className="auth-block">
-          {authConfigured ? (
-            <AuthControls />
-          ) : (
-            <span className="sync-tag" title="Локальний режим без Clerk/Convex">
-              {mode === "local" ? "локально" : mode}
-            </span>
-          )}
+          <LangSwitcher />
+          {authConfigured ? <AuthControls /> : <ProfileMenu />}
         </div>
       </header>
 
-      <nav className="nav" aria-label="Основна навігація">
-        {links.map((l) => (
-          <NavLink
-            key={l.to}
-            to={l.to}
-            end={l.end}
-            className={({ isActive }) => {
-              const onMap =
-                l.end &&
-                (location.pathname === `/${achievementId}` ||
-                  location.pathname === `/${achievementId}/`);
-              return isActive || onMap ? "nav-link active" : "nav-link";
-            }}
-          >
-            {l.label}
-          </NavLink>
-        ))}
-      </nav>
+      {!isHome && links.length > 0 ? (
+        <nav className="nav" aria-label={t("navAria")}>
+          <div className="nav-track">
+            {links.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) => {
+                  const onMap =
+                    l.end &&
+                    (location.pathname === `/${achievementId}` ||
+                      location.pathname === `/${achievementId}/`);
+                  return isActive || onMap ? "nav-link active" : "nav-link";
+                }}
+              >
+                {l.label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+      ) : null}
 
       <main className="main">{children ?? <Outlet />}</main>
     </div>

@@ -2,10 +2,13 @@ import { useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { SCANNERS, SCANNER_REGIONS, TOTAL_SCANNERS } from "../data/catalog";
 import { useProgress } from "../hooks/useProgress";
+import { useLocale } from "../i18n/LocaleContext";
+import { locField, locName, locRegion } from "../i18n/localize";
 
 type StatusFilter = "all" | "missing" | "collected";
 
 export function ScannerListPage() {
+  const { t, locale } = useLocale();
   const { collectedScannerIds, toggleScanner } = useProgress();
   const [params] = useSearchParams();
 
@@ -32,9 +35,9 @@ export function ScannerListPage() {
     <div className="page">
       <header className="page-header">
         <div>
-          <h1>Список</h1>
+          <h1>{t("listTitle")}</h1>
           <p>
-            {collectedScannerIds.size} / {TOTAL_SCANNERS} сканерів · показуємо{" "}
+            {collectedScannerIds.size} / {TOTAL_SCANNERS} · {t("listShowing")}{" "}
             {filtered.length}
           </p>
         </div>
@@ -42,36 +45,39 @@ export function ScannerListPage() {
 
       <div className="filters sticky-filters">
         <label>
-          Пошук
+          {t("search")}
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="регіон, артефакт, POI…"
+            placeholder={t("searchGeneric")}
           />
         </label>
         <label>
-          Регіон
+          {t("region")}
           <select
             value={region}
             onChange={(e) => setRegion(e.target.value)}
           >
-            <option value="all">Усі</option>
-            {SCANNER_REGIONS.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
+            <option value="all">{t("statusAll")}</option>
+            {SCANNER_REGIONS.map((r) => {
+              const sample = SCANNERS.find((s) => s.region === r);
+              return (
+                <option key={r} value={r}>
+                  {sample ? locRegion(sample, locale) : r}
+                </option>
+              );
+            })}
           </select>
         </label>
         <label>
-          Статус
+          {t("status")}
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as StatusFilter)}
           >
-            <option value="all">Усі</option>
-            <option value="missing">Не зібрано</option>
-            <option value="collected">Зібрано</option>
+            <option value="all">{t("statusAll")}</option>
+            <option value="missing">{t("statusMissing")}</option>
+            <option value="collected">{t("statusCollected")}</option>
           </select>
         </label>
       </div>
@@ -91,10 +97,10 @@ export function ScannerListPage() {
                   onChange={() => toggleScanner(s.id)}
                 />
                 <span className="flash-body">
-                  <span className="flash-title">{s.nameUk}</span>
+                  <span className="flash-title">{locName(s, locale)}</span>
                   <span className="flash-meta">
-                    {s.region} · {s.poiUk} · {s.artifactNameUk} (
-                    {s.artifactNameEn})
+                    {locRegion(s, locale)} · {s.poiUk} ·{" "}
+                    {locField(s.artifactNameUk, s.artifactNameEn, locale)}
                   </span>
                   {s.conditionUk && (
                     <span className="lock-badge">{s.conditionUk}</span>
@@ -107,7 +113,7 @@ export function ScannerListPage() {
                 className="btn btn-ghost"
                 to={`/scanning-complete?id=${s.id}`}
               >
-                Мапа
+                {t("map")}
               </Link>
             </li>
           );
@@ -115,7 +121,7 @@ export function ScannerListPage() {
       </ul>
 
       {filtered.length === 0 && (
-        <p className="hint">Немає сканерів за поточним фільтром.</p>
+        <p className="hint">{t("noResults")}</p>
       )}
     </div>
   );

@@ -1,7 +1,9 @@
 import { useRef, useState } from "react";
 import { useProgress } from "../hooks/useProgress";
+import { useLocale } from "../i18n/LocaleContext";
 
 export function DataPage() {
+  const { t, locale } = useLocale();
   const { exportJson, importJson, reset, updatedAt } = useProgress();
   const [message, setMessage] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -14,29 +16,32 @@ export function DataPage() {
     a.download = "flash-royale-progress.json";
     a.click();
     URL.revokeObjectURL(url);
-    setMessage("Експортовано.");
+    setMessage(t("exported"));
   };
 
   const onImportFile = async (file: File) => {
     try {
       const text = await file.text();
       importJson(text);
-      setMessage("Імпортовано.");
+      setMessage(t("imported"));
     } catch {
-      setMessage("Не вдалося прочитати файл.");
+      setMessage(t("importFailed"));
     }
   };
 
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Дані</h1>
+        <h1>{t("dataTitle")}</h1>
         <p>
-          Зберігається в цьому браузері
+          {t("dataStoredLocal")}
           {updatedAt > 0 && (
             <>
               {" "}
-              · оновлено {new Date(updatedAt).toLocaleString("uk-UA")}
+              · {t("dataUpdated")}{" "}
+              {new Date(updatedAt).toLocaleString(
+                locale === "uk" ? "uk-UA" : "en-US",
+              )}
             </>
           )}
         </p>
@@ -44,26 +49,26 @@ export function DataPage() {
 
       <div className="choice-actions">
         <button type="button" className="btn" onClick={onExport}>
-          Export JSON
+          {t("exportJson")}
         </button>
         <button
           type="button"
           className="btn"
           onClick={() => fileRef.current?.click()}
         >
-          Import JSON
+          {t("importJson")}
         </button>
         <button
           type="button"
           className="btn btn-danger"
           onClick={() => {
-            if (confirm("Скинути весь прогрес?")) {
+            if (confirm(t("resetConfirm"))) {
               reset();
-              setMessage("Прогрес скинуто.");
+              setMessage(t("resetDone"));
             }
           }}
         >
-          Скинути прогрес
+          {t("resetProgress")}
         </button>
       </div>
       <input

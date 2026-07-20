@@ -8,7 +8,6 @@ import {
   missingArtifactTypes,
 } from "../data/catalog";
 import {
-  ANOMALY_TYPE_LABELS,
   ANOMALY_TYPES,
   type AnomalyField,
   type AnomalyType,
@@ -21,6 +20,8 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { useLocale } from "../i18n/LocaleContext";
+import { anomalyTypeLabel, locName } from "../i18n/localize";
 
 function markerHtml(worth: boolean, approx: boolean): string {
   const tone = worth ? "worth" : "done";
@@ -29,6 +30,7 @@ function markerHtml(worth: boolean, approx: boolean): string {
 }
 
 export function MiracleMapPage() {
+  const { t, locale } = useLocale();
   const { collectedArtifactIds } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -219,11 +221,14 @@ export function MiracleMapPage() {
               ×
             </button>
             <h2 className="sheet-title">
-              {selected.nameUk}
-              <span className="sheet-title-en">{selected.nameEn}</span>
+              {locName(selected, locale)}
+              <span className="sheet-title-en">
+                {locale === "uk" ? selected.nameEn : selected.nameUk}
+              </span>
             </h2>
             <p className="flash-meta">
-              {ANOMALY_TYPE_LABELS[selected.anomalyType]} · {selected.region}
+              {anomalyTypeLabel(selected.anomalyType, locale)} ·{" "}
+              {selected.region}
               {selected.coordApprox ? " · орієнтовні координати" : ""}
             </p>
             <p className="notes">
@@ -238,7 +243,7 @@ export function MiracleMapPage() {
       <div className="map-filters-card">
         <div className="filters map-filters">
           <label>
-            Тип аномалії
+            {t("anomalyType")}
             <select
               value={anomalyType}
               onChange={(e) => {
@@ -252,10 +257,10 @@ export function MiracleMapPage() {
                 });
               }}
             >
-              <option value="all">Усі</option>
-              {ANOMALY_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {ANOMALY_TYPE_LABELS[t]}
+              <option value="all">{t("statusAll")}</option>
+              {ANOMALY_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {anomalyTypeLabel(type, locale)}
                 </option>
               ))}
             </select>

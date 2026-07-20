@@ -4,6 +4,7 @@ import { ClerkProvider, useAuth } from "@clerk/clerk-react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
 import App from "./App";
+import { LocaleProvider } from "./i18n/LocaleContext";
 import "./index.css";
 
 const clerkKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string | undefined;
@@ -26,7 +27,9 @@ function Providers({ children }: { children: ReactNode }) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Providers>
-      <App />
+      <LocaleProvider>
+        <App />
+      </LocaleProvider>
     </Providers>
   </StrictMode>,
 );
