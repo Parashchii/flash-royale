@@ -13,7 +13,16 @@
   --radius: 10px;
   --font-display: "IBM Plex Sans", "Segoe UI", sans-serif;
   --font-body: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-stalker: "Amaz Stalker", "IBM Plex Sans", sans-serif;
   color-scheme: dark;
+}
+
+@font-face {
+  font-family: "Amaz Stalker";
+  src: url("./assets/fonts/amaz-stalker.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 * {
@@ -42,153 +51,49 @@ a {
 }
 
 .app {
-  max-width: 920px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 1rem 5rem;
 }
 
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 0 0.5rem;
-  position: relative;
+.app-chrome {
+  position: sticky;
+  top: 0;
   z-index: 1100;
-}
-
-.brand {
-  margin: 0;
-  font-size: clamp(0.85rem, 2.8vw, 1.15rem);
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  line-height: 1.25;
-}
-
-.brand-primary {
-  color: var(--ink);
-}
-
-.brand-sep {
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.brand-secondary {
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.achievement-switcher {
-  position: relative;
-  display: inline-flex;
-  vertical-align: baseline;
-  z-index: 1;
-}
-
-.achievement-switcher-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin: 0;
-  padding: 0.2rem 0.5rem;
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--accent) 18%, var(--bg-elev));
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  font-size: inherit;
-  cursor: pointer;
-  line-height: 1.25;
-  box-shadow: inset 0 1px 0 #fff1;
-}
-
-.achievement-switcher-btn:hover,
-.achievement-switcher-btn[aria-expanded="true"] {
-  color: var(--ink);
-  border-color: color-mix(in srgb, var(--accent) 55%, var(--line));
-  background: color-mix(in srgb, var(--accent) 28%, var(--bg-elev));
-}
-
-.achievement-switcher-chevron {
-  font-size: 0.7em;
-  opacity: 0.75;
-}
-
-.achievement-menu {
-  position: fixed;
-  z-index: 10000;
-  min-width: min(280px, 80vw);
-  margin: 0;
-  padding: 0.35rem;
-  list-style: none;
-  background: var(--bg-elev);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: 0 8px 24px #0008;
-}
-
-.achievement-menu-divider {
-  height: 1px;
-  margin: 0.4rem 0.5rem;
-  padding: 0;
-  background: color-mix(in srgb, var(--ink) 28%, var(--line));
-  list-style: none;
-  pointer-events: none;
-}
-
-.brand-text,
-.brand {
-  overflow: visible;
-}
-
-.achievement-option {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
   width: 100%;
+  background:
+    linear-gradient(
+      180deg,
+      var(--bg) 0%,
+      color-mix(in srgb, var(--bg) 96%, transparent) 88%,
+      color-mix(in srgb, var(--bg) 78%, transparent) 100%
+    );
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+}
+
+.app-chrome-inner {
+  width: 100%;
+  max-width: none;
   margin: 0;
-  padding: 0.55rem 0.65rem;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  padding: 0 clamp(0.85rem, 2.5vw, 1.75rem);
 }
 
-.achievement-option:hover,
-.achievement-option.active {
-  background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem 1.25rem;
+  padding: 0.85rem 0 0.65rem;
+  position: relative;
 }
 
-.achievement-option-en {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.achievement-option-uk {
-  color: var(--muted);
-  font-size: 0.8rem;
-}
-
-.map-placeholder-note {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 400;
-  transform: translate(-50%, -50%);
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--bg-elev) 88%, transparent);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.9rem;
-  text-align: center;
-  pointer-events: none;
+.topbar-start {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  justify-self: start;
 }
 
 .brand-block {
@@ -196,6 +101,7 @@ a {
   align-items: center;
   gap: 0.65rem;
   min-width: 0;
+  flex-shrink: 0;
 }
 
 .brand-logo {
@@ -207,27 +113,6 @@ a {
   box-shadow: 0 0 0 1px #7a451866, 0 2px 8px #0006;
 }
 
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.progress-pill {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-
-.auth-block {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  flex-shrink: 0;
-}
-
 .brand-home-link {
   display: flex;
   flex-shrink: 0;
@@ -235,13 +120,84 @@ a {
   text-decoration: none;
 }
 
-a.brand-primary {
-  color: var(--ink);
+.brand-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
   text-decoration: none;
+  color: var(--accent);
+  line-height: 1;
+  white-space: nowrap;
+  transition: color 0.15s ease;
 }
 
-a.brand-primary:hover {
+.brand-stalker,
+.brand-solutions {
+  font-family: var(--font-stalker);
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: normal;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: inherit;
+  text-transform: none;
+}
+
+.brand-name:hover {
+  color: #fff;
+}
+
+.ach-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 0.15rem 0;
+  justify-self: center;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ach-nav-link {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.ach-nav-link:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.ach-nav-link.active {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg-elev));
+}
+
+.progress-pill {
+  margin: 0;
+  font-size: 0.85rem;
   color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.auth-block {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-shrink: 0;
+  justify-self: end;
 }
 
 .lang-switcher {
@@ -362,14 +318,17 @@ a.brand-primary:hover {
   margin-bottom: 0.75rem;
 }
 
+.section-nav-bar {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  box-sizing: border-box;
+}
+
 .nav {
   display: flex;
   padding: 0.35rem 0 0.95rem;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: linear-gradient(var(--bg) 70%, transparent);
-  backdrop-filter: blur(6px);
 }
 
 .nav-track {
@@ -425,7 +384,7 @@ a.brand-primary:hover {
 
 .sticky-filters {
   position: sticky;
-  top: 3.1rem;
+  top: 7.25rem;
   z-index: 15;
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   padding: 0.5rem 0;
@@ -751,7 +710,7 @@ textarea {
 }
 
 .app.app-home {
-  max-width: 1080px;
+  max-width: 1400px;
 }
 
 .landing {
@@ -891,6 +850,13 @@ textarea {
   .landing-grid-tools {
     grid-template-columns: 1fr;
     max-width: 22rem;
+  }
+}
+
+@media (min-width: 1100px) {
+  .landing-grid-trackers {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
   }
 }
 
@@ -1892,6 +1858,29 @@ textarea {
     max-height: calc(100% - 1.5rem);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+  }
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "start auth"
+      "nav nav";
+  }
+
+  .topbar-start {
+    grid-area: start;
+  }
+
+  .ach-nav {
+    grid-area: nav;
+    justify-self: stretch;
+    justify-content: flex-start;
+  }
+
+  .auth-block {
+    grid-area: auth;
   }
 }
 

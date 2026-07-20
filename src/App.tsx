@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./components/AppShell";
+import { ScrollToTop } from "./components/ScrollToTop";
 import { ProgressProvider } from "./hooks/useProgress";
 import { AchievementProvider } from "./hooks/useAchievement";
 import { HomePage } from "./pages/HomePage";
@@ -62,6 +63,7 @@ export default function App() {
   return (
     <ProgressProvider>
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route
             path="/"

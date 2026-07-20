@@ -12,6 +12,7 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { useLocale } from "../i18n/LocaleContext";
 
 type StatusFilter = "all" | "missing" | "collected";
 
@@ -22,6 +23,7 @@ function markerHtml(got: boolean): string {
 }
 
 export function ScannerMapPage() {
+  const { t } = useLocale();
   const { collectedScannerIds, toggleScanner } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -146,7 +148,7 @@ export function ScannerMapPage() {
   return (
     <div className="page map-page">
       <section className="guarantee-card" aria-labelledby="scanner-map-title">
-        <h2 id="scanner-map-title">Як гарантувати «Сканування завершено»</h2>
+        <h2 id="scanner-map-title">{t("scannerGuaranteeTitle")}</h2>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -155,8 +157,9 @@ export function ScannerMapPage() {
               </svg>
             </span>
             <span>
-              Активуйте <strong>10 стаціонарних сканерів</strong> і заберіть
-              артефакт з кожного. Це не ручні детектори (Echo / Bear тощо).
+              {t("scannerGuarantee1Before")}{" "}
+              <strong>{t("scannerGuarantee1Strong")}</strong>{" "}
+              {t("scannerGuarantee1After")}
             </span>
           </li>
           <li>
@@ -165,10 +168,7 @@ export function ScannerMapPage() {
                 <path d="M10.88 1.93a1 1 0 0 0-1.76 0L1.12 16.07A1 1 0 0 0 2 17.5h16a1 1 0 0 0 .88-1.43L10.88 1.93zM10 7.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0V8A.75.75 0 0 1 10 7.25zm0 7.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
               </svg>
             </span>
-            <span>
-              Артефакти тримати разом не обовʼязково — рахується активація
-              сканера. Хімзаводський працює лише після півночі.
-            </span>
+            <span>{t("scannerGuarantee2")}</span>
           </li>
         </ul>
       </section>
@@ -178,7 +178,7 @@ export function ScannerMapPage() {
           ref={mapEl}
           className="pda-map"
           role="application"
-          aria-label="Мапа Зони — сканери"
+          aria-label={t("mapAriaScanners")}
         />
 
         {selected && (
@@ -187,7 +187,7 @@ export function ScannerMapPage() {
               type="button"
               className="sheet-close"
               onClick={closeSheet}
-              aria-label="Закрити"
+              aria-label={t("close")}
             >
               ×
             </button>
@@ -220,7 +220,7 @@ export function ScannerMapPage() {
                 className="btn btn-ghost"
                 to={`/scanning-complete/list?q=${encodeURIComponent(selected.region)}`}
               >
-                У списку
+                {t("inList")}
               </Link>
             </div>
           </aside>
@@ -230,12 +230,12 @@ export function ScannerMapPage() {
       <div className="map-filters-card">
         <div className="filters map-filters">
           <label>
-            Регіон
+            {t("region")}
             <select
               value={region}
               onChange={(e) => setRegion(e.target.value)}
             >
-              <option value="all">Усі</option>
+              <option value="all">{t("statusAll")}</option>
               {SCANNER_REGIONS.map((r) => (
                 <option key={r} value={r}>
                   {r}
@@ -244,14 +244,14 @@ export function ScannerMapPage() {
             </select>
           </label>
           <label>
-            Статус
+            {t("status")}
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as StatusFilter)}
             >
-              <option value="all">Усі</option>
-              <option value="missing">Не зібрано</option>
-              <option value="collected">Зібрано</option>
+              <option value="all">{t("statusAll")}</option>
+              <option value="missing">{t("statusMissing")}</option>
+              <option value="collected">{t("statusCollected")}</option>
             </select>
           </label>
         </div>
@@ -259,10 +259,9 @@ export function ScannerMapPage() {
 
       <p className="hint map-legend">
         <span className="sc-marker sc-marker-missing legend-swatch">◆</span>{" "}
-        ще не зібрано{" "}
+        {t("legendMissing")}{" "}
         <span className="sc-marker sc-marker-collected legend-swatch">✓</span>{" "}
-        зібрано · координати: Steam teleport-гайд · описи: Fextralife /
-        Steam · тайли: joric/stalker2_tileset
+        {t("legendCollected")} · {t("legendScannerSources")} · {t("legendTiles")}
       </p>
     </div>
   );

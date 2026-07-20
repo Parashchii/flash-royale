@@ -174,7 +174,7 @@ export function MiracleMapPage() {
   return (
     <div className="page map-page">
       <section className="guarantee-card" aria-labelledby="miracle-map-title">
-        <h2 id="miracle-map-title">Як гарантувати «Збирач див»</h2>
+        <h2 id="miracle-map-title">{t("miracleGuaranteeTitle")}</h2>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -183,9 +183,9 @@ export function MiracleMapPage() {
               </svg>
             </span>
             <span>
-              Зберіть <strong>69 унікальних артефактів</strong> в одному сейві
-              (інвентар або особистий ящик одночасно). Архі-артефакти не
-              потрібні.
+              {t("miracleGuarantee1Before")}{" "}
+              <strong>{t("miracleGuarantee1Strong")}</strong>{" "}
+              {t("miracleGuarantee1After")}
             </span>
           </li>
           <li>
@@ -195,8 +195,9 @@ export function MiracleMapPage() {
               </svg>
             </span>
             <span>
-              Поля <strong>варте уваги</strong>, поки для їхнього типу ще є
-              незабрані артефакти. Коли тип закрито — маркери приглушуються.
+              {t("miracleGuarantee2Before")}{" "}
+              <strong>{t("miracleGuarantee2Strong")}</strong>
+              {t("miracleGuarantee2After")}
             </span>
           </li>
         </ul>
@@ -207,7 +208,7 @@ export function MiracleMapPage() {
           ref={mapEl}
           className="pda-map"
           role="application"
-          aria-label="Мапа Зони — поля аномалій"
+          aria-label={t("mapAriaAnomalies")}
         />
 
         {selected && selectedProg && (
@@ -216,7 +217,7 @@ export function MiracleMapPage() {
               type="button"
               className="sheet-close"
               onClick={closeSheet}
-              aria-label="Закрити"
+              aria-label={t("close")}
             >
               ×
             </button>
@@ -271,16 +272,16 @@ export function MiracleMapPage() {
               checked={worthOnly}
               onChange={(e) => setWorthOnly(e.target.checked)}
             />
-            Лише «варте уваги»
+            {t("worthOnly")}
           </label>
         </div>
       </div>
 
       <p className="hint map-legend">
-        <span className="mh-marker mh-marker-worth legend-swatch">◆</span> варте
-        уваги{" "}
-        <span className="mh-marker mh-marker-done legend-swatch">✓</span> тип
-        зібрано · координати з teleport-гайду · тайли: joric/stalker2_tileset
+        <span className="mh-marker mh-marker-worth legend-swatch">◆</span>{" "}
+        {t("legendWorth")}{" "}
+        <span className="mh-marker mh-marker-done legend-swatch">✓</span>{" "}
+        {t("legendTypeDone")} · {t("legendMiracleCoords")} · {t("legendTiles")}
       </p>
     </div>
   );

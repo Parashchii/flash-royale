@@ -50,7 +50,7 @@ function wrapClass(layer: LayerId): string {
 }
 
 export function AllMapPage() {
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const {
     collectedKeys,
     collectedArtifactIds,
@@ -277,7 +277,7 @@ export function AllMapPage() {
   return (
     <div className="page map-page">
       <section className="guarantee-card" aria-labelledby="all-map-title">
-        <h2 id="all-map-title">Усі маркери</h2>
+        <h2 id="all-map-title">{t("allMapTitle")}</h2>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -286,29 +286,29 @@ export function AllMapPage() {
               </svg>
             </span>
             <span>
-              На одній мапі:{" "}
+              {t("allMapIntroBefore")}{" "}
               <Link className="layer-link layer-link-fr" to="/flash-royale">
-                флешки
+                {t("allMapLinkFlash")}
               </Link>
               ,{" "}
               <Link className="layer-link layer-link-mh" to="/miracle-hoarder">
-                поля аномалій
+                {t("allMapLinkAnomalies")}
               </Link>
               ,{" "}
               <Link
                 className="layer-link layer-link-sc"
                 to="/scanning-complete"
               >
-                сканери
+                {t("allMapLinkScanners")}
               </Link>
               ,{" "}
               <Link
                 className="layer-link layer-link-aa"
                 to="/curiouser-curiouser"
               >
-                архіартефакти
+                {t("allMapLinkArch")}
               </Link>
-              . Увімкніть/вимкніть шари нижче.
+              {t("allMapIntroAfter")}
             </span>
           </li>
         </ul>
@@ -319,7 +319,7 @@ export function AllMapPage() {
           ref={mapEl}
           className="pda-map"
           role="application"
-          aria-label="Мапа Зони — усі маркери"
+          aria-label={t("mapAriaAll")}
         />
 
         {selected && (
@@ -328,7 +328,7 @@ export function AllMapPage() {
               type="button"
               className="sheet-close"
               onClick={closeSheet}
-              aria-label="Закрити"
+              aria-label={t("close")}
             >
               ×
             </button>
@@ -340,12 +340,12 @@ export function AllMapPage() {
             </h2>
             <p className="flash-meta">
               {locName(ACHIEVEMENTS[selected.layer], locale)} · {selected.meta}
-              {selected.done ? " · зібрано / закрито" : ""}
+              {selected.done ? t("allMapDoneSuffix") : ""}
             </p>
             {selected.detail && <p className="notes">{selected.detail}</p>}
             <div className="choice-actions">
               <Link className="btn" to={selected.mapHref}>
-                Відкрити в ачівці
+                {t("allMapOpenInAch")}
               </Link>
             </div>
           </aside>
@@ -353,7 +353,7 @@ export function AllMapPage() {
       </div>
 
       <div className="map-filters-card">
-        <div className="filters map-filters all-map-layers" role="group" aria-label="Шари">
+        <div className="filters map-filters all-map-layers" role="group" aria-label={t("layers")}>
           {layerIds.map((id) => (
             <label key={id} className="check-label">
               <input
@@ -369,13 +369,13 @@ export function AllMapPage() {
 
       <p className="hint map-legend">
         <span className="fr-marker fr-marker-missing legend-swatch">◆</span>{" "}
-        флешки ({flashDone}/{UNIQUE_BLUEPRINT_KEYS.length}){" "}
+        {t("legendFlash")} ({flashDone}/{UNIQUE_BLUEPRINT_KEYS.length}){" "}
         <span className="mh-marker mh-marker-worth legend-swatch">◆</span>{" "}
-        аномалії{" "}
+        {t("legendAnomalies")}{" "}
         <span className="sc-marker sc-marker-missing legend-swatch">◆</span>{" "}
-        сканери ({collectedScannerIds.size}/{SCANNERS.length}){" "}
+        {t("legendScanners")} ({collectedScannerIds.size}/{SCANNERS.length}){" "}
         <span className="aa-marker aa-marker-missing legend-swatch">◆</span>{" "}
-        архі ({collectedArchArtifactIds.size}/{ARCH_ARTIFACTS.length})
+        {t("legendArch")} ({collectedArchArtifactIds.size}/{ARCH_ARTIFACTS.length})
       </p>
     </div>
   );

@@ -7,19 +7,25 @@ import {
   UNIQUE_BLUEPRINT_KEYS,
 } from "../data/catalog";
 import {
+  ACHIEVEMENT_LIST,
+  ACHIEVEMENTS,
   isAchievementId,
   type AchievementId,
 } from "../data/achievements";
 import { authConfigured, useProgress } from "../hooks/useProgress";
 import { useAchievementOptional } from "../hooks/useAchievement";
 import { useLocale } from "../i18n/LocaleContext";
+import { locName } from "../i18n/localize";
 import { AuthControls } from "./AuthControls";
-import { AchievementSwitcher } from "./AchievementSwitcher";
 import { LangSwitcher } from "./LangSwitcher";
 import { ProfileMenu } from "./ProfileMenu";
 import radiationLogo from "../assets/radiation-logo.png";
 
-function useNavLinks(achievementId: AchievementId) {
+const TRACKER_NAV_ORDER: AchievementId[] = ACHIEVEMENT_LIST.filter(
+  (a) => a.id !== "show-all",
+).map((a) => a.id);
+
+function useSectionLinks(achievementId: AchievementId) {
   const { t } = useLocale();
   if (achievementId === "show-all") {
     return [];
@@ -79,14 +85,15 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
   const location = useLocation();
   const params = useParams();
   const achCtx = useAchievementOptional();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
 
   const isHome = location.pathname === "/";
 
   const achievementId: AchievementId = achCtx?.achievementId
     ?? (isAchievementId(params.achievementId) ? params.achievementId : "flash-royale");
 
-  const links = useNavLinks(achievementId);
+  const sectionLinks = useSectionLinks(achievementId);
+  const showProgress = !isHome;
 
   const { done, total } = progressFor(
     achievementId,
@@ -97,63 +104,97 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
   );
 
   return (
-    <div className={isHome ? "app app-home" : "app"}>
-      <header className="topbar">
-        <div className="brand-block">
-          <Link to="/" className="brand-home-link" aria-label={t("navHome")}>
-            <img
-              className="brand-logo"
-              src={radiationLogo}
-              alt=""
-              width={36}
-              height={36}
-            />
-          </Link>
-          {!isHome ? (
-            <div className="brand-text">
-              <div className="brand">
-                <Link to="/" className="brand-primary">
-                  {t("brandTitle")}
+    <>
+      <div className="app-chrome">
+        <div className="app-chrome-inner">
+          <header className="topbar">
+            <div className="topbar-start">
+              <div className="brand-block">
+                <Link to="/" className="brand-home-link" aria-label={t("navHome")}>
+                  <img
+                    className="brand-logo"
+                    src={radiationLogo}
+                    alt=""
+                    width={36}
+                    height={36}
+                  />
                 </Link>
-                <span className="brand-sep"> | </span>
-                <AchievementSwitcher />
+                <Link to="/" className="brand-name" aria-label={t("brandTitle")}>
+                  <span className="brand-stalker">stalker</span>
+                  <span className="brand-solutions"> solutions</span>
+                </Link>
               </div>
-              <p className="progress-pill">
-                {Math.min(done, total)} / {total}
-              </p>
-            </div>
-          ) : null}
-        </div>
-        <div className="auth-block">
-          <LangSwitcher />
-          {authConfigured ? <AuthControls /> : <ProfileMenu />}
-        </div>
-      </header>
-
-      {!isHome && links.length > 0 ? (
-        <nav className="nav" aria-label={t("navAria")}>
-          <div className="nav-track">
-            {links.map((l) => (
               <NavLink
-                key={l.to}
-                to={l.to}
-                end={l.end}
-                className={({ isActive }) => {
-                  const onMap =
-                    l.end &&
-                    (location.pathname === `/${achievementId}` ||
-                      location.pathname === `/${achievementId}/`);
-                  return isActive || onMap ? "nav-link active" : "nav-link";
-                }}
+                to="/show-all"
+                className={({ isActive }) =>
+                  isActive || location.pathname.startsWith("/show-all/")
+                    ? "ach-nav-link active"
+                    : "ach-nav-link"
+                }
               >
-                {l.label}
+                {locName(ACHIEVEMENTS["show-all"], locale)}
               </NavLink>
-            ))}
-          </div>
-        </nav>
-      ) : null}
+            </div>
 
-      <main className="main">{children ?? <Outlet />}</main>
-    </div>
+            <nav className="ach-nav" aria-label={t("achNavAria")}>
+              {TRACKER_NAV_ORDER.map((id) => {
+                const meta = ACHIEVEMENTS[id];
+                const active =
+                  location.pathname === `/${id}` ||
+                  location.pathname.startsWith(`/${id}/`);
+                return (
+                  <NavLink
+                    key={id}
+                    to={`/${id}`}
+                    className={active ? "ach-nav-link active" : "ach-nav-link"}
+                  >
+                    {locName(meta, locale)}
+                  </NavLink>
+                );
+              })}
+            </nav>
+
+            <div className="auth-block">
+              {showProgress ? (
+                <p className="progress-pill">
+                  {Math.min(done, total)} / {total}
+                </p>
+              ) : null}
+              <LangSwitcher />
+              {authConfigured ? <AuthControls /> : <ProfileMenu />}
+            </div>
+          </header>
+        </div>
+
+        {!isHome && sectionLinks.length > 0 ? (
+          <div className="section-nav-bar">
+            <nav className="nav" aria-label={t("navAria")}>
+              <div className="nav-track">
+                {sectionLinks.map((l) => (
+                  <NavLink
+                    key={l.to}
+                    to={l.to}
+                    end={l.end}
+                    className={({ isActive }) => {
+                      const onMap =
+                        l.end &&
+                        (location.pathname === `/${achievementId}` ||
+                          location.pathname === `/${achievementId}/`);
+                      return isActive || onMap ? "nav-link active" : "nav-link";
+                    }}
+                  >
+                    {l.label}
+                  </NavLink>
+                ))}
+              </div>
+            </nav>
+          </div>
+        ) : null}
+      </div>
+
+      <div className={isHome ? "app app-home" : "app"}>
+        <main className="main">{children ?? <Outlet />}</main>
+      </div>
+    </>
   );
 }

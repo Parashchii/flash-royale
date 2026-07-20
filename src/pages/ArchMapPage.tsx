@@ -149,7 +149,7 @@ export function ArchMapPage() {
   return (
     <div className="page map-page">
       <section className="guarantee-card" aria-labelledby="arch-map-title">
-        <h2 id="arch-map-title">Як гарантувати «Все цікавіше й цікавіше»</h2>
+        <h2 id="arch-map-title">{t("archGuaranteeTitle")}</h2>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -158,8 +158,9 @@ export function ArchMapPage() {
               </svg>
             </span>
             <span>
-              Зберіть <strong>6 архіартефактів</strong> з архіаномалій (Weird /
-              «Дивний…»). Детектор їх не показує — шукайте вручну.
+              {t("archGuarantee1Before")}{" "}
+              <strong>{t("archGuarantee1Strong")}</strong>{" "}
+              {t("archGuarantee1After")}
             </span>
           </li>
           <li>
@@ -168,10 +169,7 @@ export function ArchMapPage() {
                 <path d="M10.88 1.93a1 1 0 0 0-1.76 0L1.12 16.07A1 1 0 0 0 2 17.5h16a1 1 0 0 0 .88-1.43L10.88 1.93zM10 7.25a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0V8A.75.75 0 0 1 10 7.25zm0 7.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
               </svg>
             </span>
-            <span>
-              «Дивна вода» зʼявляється лише вночі (22:00–04:00). Для «Імли» та
-              «Вогняного смерчу» потрібен короткий пазл / платформінг.
-            </span>
+            <span>{t("archGuarantee2")}</span>
           </li>
         </ul>
       </section>
@@ -181,7 +179,7 @@ export function ArchMapPage() {
           ref={mapEl}
           className="pda-map"
           role="application"
-          aria-label="Мапа Зони — архіартефакти"
+          aria-label={t("mapAriaArch")}
         />
 
         {selected && (
@@ -190,7 +188,7 @@ export function ArchMapPage() {
               type="button"
               className="sheet-close"
               onClick={closeSheet}
-              aria-label="Закрити"
+              aria-label={t("close")}
             >
               ×
             </button>
@@ -239,12 +237,12 @@ export function ArchMapPage() {
       <div className="map-filters-card">
         <div className="filters map-filters">
           <label>
-            Регіон
+            {t("region")}
             <select
               value={region}
               onChange={(e) => setRegion(e.target.value)}
             >
-              <option value="all">Усі</option>
+              <option value="all">{t("statusAll")}</option>
               {ARCH_REGIONS.map((r) => (
                 <option key={r} value={r}>
                   {r}
@@ -253,14 +251,14 @@ export function ArchMapPage() {
             </select>
           </label>
           <label>
-            Статус
+            {t("status")}
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as StatusFilter)}
             >
-              <option value="all">Усі</option>
-              <option value="missing">Не зібрано</option>
-              <option value="collected">Зібрано</option>
+              <option value="all">{t("statusAll")}</option>
+              <option value="missing">{t("statusMissing")}</option>
+              <option value="collected">{t("statusCollected")}</option>
             </select>
           </label>
         </div>
@@ -268,10 +266,9 @@ export function ArchMapPage() {
 
       <p className="hint map-legend">
         <span className="aa-marker aa-marker-missing legend-swatch">◆</span>{" "}
-        ще не зібрано{" "}
+        {t("legendMissing")}{" "}
         <span className="aa-marker aa-marker-collected legend-swatch">✓</span>{" "}
-        зібрано · координати: Steam Console Commands · описи: Steam-гайди ·
-        тайли: joric/stalker2_tileset
+        {t("legendCollected")} · {t("legendArchSources")} · {t("legendTiles")}
       </p>
     </div>
   );

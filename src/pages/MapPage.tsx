@@ -18,6 +18,7 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { useLocale } from "../i18n/LocaleContext";
 
 type StatusFilter = "all" | "missing" | "collected" | "locked" | "locked_missed";
 
@@ -54,6 +55,7 @@ function markerHtml(
 }
 
 export function MapPage() {
+  const { t } = useLocale();
   const { collectedKeys, choices, toggleCollected } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -194,7 +196,7 @@ export function MapPage() {
   return (
     <div className="page map-page">
       <section className="guarantee-card" aria-labelledby="guarantee-title">
-        <h2 id="guarantee-title">Як гарантувати отримання всіх флешок</h2>
+        <h2 id="guarantee-title">{t("flashGuaranteeTitle")}</h2>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -203,14 +205,14 @@ export function MapPage() {
               </svg>
             </span>
             <span>
-              На НДІЧАЗ{" "}
+              {t("flashGuarantee1Before")}{" "}
               <Link
                 className="guarantee-link"
                 to="/flash-royale?id=integral-a-return-mechanism-sircaa"
               >
-                забрати флешку
+                {t("flashGuarantee1Link")}
               </Link>{" "}
-              (червона на мапі). Гарантія 100% лише якщо її не пропустити.
+              {t("flashGuarantee1After")}
             </span>
           </li>
           <li>
@@ -220,15 +222,16 @@ export function MapPage() {
               </svg>
             </span>
             <span>
-              У квесті «Потеряні хлопці»{" "}
-              <strong>допоможіть Девʼятому</strong>.
+              {t("flashGuarantee2Before")}{" "}
+              <strong>{t("flashGuarantee2Strong")}</strong>
+              {t("flashGuarantee2After")}
             </span>
           </li>
         </ul>
       </section>
 
       <div className="map-stage">
-        <div ref={mapEl} className="pda-map" role="application" aria-label="Мапа Зони" />
+        <div ref={mapEl} className="pda-map" role="application" aria-label={t("mapAria")} />
 
         {selected && (
           <aside className="map-sheet" aria-live="polite">
@@ -322,9 +325,9 @@ export function MapPage() {
       <div className="map-filters-card">
         <div className="filters map-filters">
           <label>
-            Регіон
+            {t("region")}
             <select value={region} onChange={(e) => setRegion(e.target.value)}>
-              <option value="all">Усі</option>
+              <option value="all">{t("statusAll")}</option>
               {REGIONS.map((r) => (
                 <option key={r} value={r}>
                   {r}
@@ -333,28 +336,28 @@ export function MapPage() {
             </select>
           </label>
           <label>
-            Тип
+            {t("category")}
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value as typeof category)}
             >
-              <option value="all">Усі</option>
-              <option value="weapon">Зброя</option>
-              <option value="helmet">Шоломи</option>
-              <option value="armor">Броня</option>
+              <option value="all">{t("statusAll")}</option>
+              <option value="weapon">{t("categoryWeapon")}</option>
+              <option value="helmet">{t("categoryHelmet")}</option>
+              <option value="armor">{t("categoryArmor")}</option>
             </select>
           </label>
           <label>
-            Статус
+            {t("status")}
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as StatusFilter)}
             >
-              <option value="all">Усі</option>
-              <option value="missing">Не зібрано</option>
-              <option value="collected">Зібрано</option>
-              <option value="locked">Сюжет / можна пропустити</option>
-              <option value="locked_missed">Заблоковано вибором</option>
+              <option value="all">{t("statusAll")}</option>
+              <option value="missing">{t("statusMissing")}</option>
+              <option value="collected">{t("statusCollected")}</option>
+              <option value="locked">{t("statusLocked")}</option>
+              <option value="locked_missed">{t("statusLockedMissed")}</option>
             </select>
           </label>
           <label className="check-label">
@@ -363,24 +366,24 @@ export function MapPage() {
               checked={spoilers}
               onChange={(e) => setSpoilers(e.target.checked)}
             />
-            Спойлери
+            {t("spoilers")}
           </label>
         </div>
       </div>
 
       <p className="hint map-legend">
-        <span className="fr-marker fr-marker-missing legend-swatch">◆</span> не
-        зібрано{" "}
+        <span className="fr-marker fr-marker-missing legend-swatch">◆</span>{" "}
+        {t("legendMissing")}{" "}
         <span className="fr-marker fr-marker-duplicate legend-swatch">◆</span>{" "}
-        дублікат{" "}
+        {t("legendDuplicate")}{" "}
         <span className="fr-marker fr-marker-quest-only legend-swatch">◆</span>{" "}
-        квест НДІЧАЗ{" "}
+        {t("legendQuestSircaa")}{" "}
         <span className="fr-marker fr-marker-collected legend-swatch">✓</span>{" "}
-        зібрано{" "}
+        {t("legendCollected")}{" "}
         <span className="fr-marker fr-marker-locked_missed legend-swatch">
           !
         </span>{" "}
-        заблоковано · тайли: joric/stalker2_tileset
+        {t("legendLocked")} · {t("legendTiles")}
       </p>
     </div>
   );
