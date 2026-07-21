@@ -465,6 +465,10 @@ textarea {
 }
 
 .flash-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.35rem;
   color: var(--muted);
   font-size: 0.86rem;
 }
@@ -1381,14 +1385,18 @@ textarea {
 .mh-marker {
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  border: 2px solid #1a1712;
+  border: 0;
   box-shadow: 0 1px 4px #000a;
-  color: #1a1712;
+  color: #fff8ef;
+}
+
+.mh-marker svg {
+  display: block;
 }
 
 .mh-marker-worth {
@@ -1401,9 +1409,75 @@ textarea {
   opacity: 0.72;
 }
 
+.mh-marker-type.mh-marker-chemical.mh-marker-worth {
+  background: #2fbf4a;
+}
+
+.mh-marker-type.mh-marker-gravitational.mh-marker-worth {
+  background: #7a52f0;
+}
+
+.mh-marker-type.mh-marker-thermal.mh-marker-worth {
+  background: #f06a14;
+}
+
+.mh-marker-type.mh-marker-electro.mh-marker-worth {
+  background: #12b7e6;
+}
+
+.mh-marker-type.mh-marker-done {
+  background: #5a635f;
+}
+
 .mh-marker-approx {
   outline: 2px dashed #efe6d488;
   outline-offset: 1px;
+}
+
+.mh-type-icon {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+.mh-type-icon svg {
+  display: block;
+}
+
+.mh-type-icon-badge {
+  border-radius: 999px;
+  box-shadow: 0 1px 3px #0007;
+}
+
+.mh-type-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.mh-type-status-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.mh-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem 0.75rem;
+}
+
+.mh-legend-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.mh-legend-sep {
+  opacity: 0.55;
 }
 
 .mh-status-badge {
@@ -1508,7 +1582,7 @@ textarea {
 .mh-section-chemical {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, #6db86d 14%, var(--bg)) 0%,
+    color-mix(in srgb, #2fbf4a 16%, var(--bg)) 0%,
     var(--bg) 100%
   );
   border-color: transparent;
@@ -1517,7 +1591,7 @@ textarea {
 .mh-section-gravitational {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, #8b7ad6 14%, var(--bg)) 0%,
+    color-mix(in srgb, #7a52f0 16%, var(--bg)) 0%,
     var(--bg) 100%
   );
   border-color: transparent;
@@ -1526,7 +1600,7 @@ textarea {
 .mh-section-thermal {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, #d4874a 14%, var(--bg)) 0%,
+    color-mix(in srgb, #f06a14 16%, var(--bg)) 0%,
     var(--bg) 100%
   );
   border-color: transparent;
@@ -1535,7 +1609,7 @@ textarea {
 .mh-section-electro {
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, #4db6d4 14%, var(--bg)) 0%,
+    color-mix(in srgb, #12b7e6 16%, var(--bg)) 0%,
     var(--bg) 100%
   );
   border-color: transparent;
@@ -1569,22 +1643,22 @@ textarea {
 }
 
 .mh-type-chemical.mh-artifact-list {
-  background: color-mix(in srgb, #6db86d 12%, var(--bg-elev));
+  background: color-mix(in srgb, #2fbf4a 14%, var(--bg-elev));
   border-color: transparent;
 }
 
 .mh-type-gravitational.mh-artifact-list {
-  background: color-mix(in srgb, #8b7ad6 12%, var(--bg-elev));
+  background: color-mix(in srgb, #7a52f0 14%, var(--bg-elev));
   border-color: transparent;
 }
 
 .mh-type-thermal.mh-artifact-list {
-  background: color-mix(in srgb, #d4874a 12%, var(--bg-elev));
+  background: color-mix(in srgb, #f06a14 14%, var(--bg-elev));
   border-color: transparent;
 }
 
 .mh-type-electro.mh-artifact-list {
-  background: color-mix(in srgb, #4db6d4 12%, var(--bg-elev));
+  background: color-mix(in srgb, #12b7e6 14%, var(--bg-elev));
   border-color: transparent;
 }
 

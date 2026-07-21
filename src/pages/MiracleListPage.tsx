@@ -16,6 +16,7 @@ import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
 import { anomalyTypeLabel, locName } from "../i18n/localize";
 import type { Locale } from "../i18n/messages";
+import { AnomalyTypeIcon } from "../components/AnomalyTypeIcon";
 
 type StatusFilter = "all" | ArtifactStatus;
 type ViewMode = "list" | "grid";
@@ -326,7 +327,10 @@ export function MiracleListPage() {
         >
           <div className="mh-type-header">
             <div className="mh-type-heading">
-              <h2 id={`type-${type}`}>{anomalyTypeLabel(type, locale)}</h2>
+              <h2 id={`type-${type}`}>
+                <AnomalyTypeIcon type={type} size={44} onColorBg />
+                <span>{anomalyTypeLabel(type, locale)}</span>
+              </h2>
               <p className="mh-type-meta">
                 {progress.got}/{progress.total} {t("collectedOf")}
               </p>

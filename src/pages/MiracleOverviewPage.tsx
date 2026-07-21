@@ -9,6 +9,7 @@ import { ANOMALY_TYPES } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
 import { anomalyTypeLabel, locName } from "../i18n/localize";
+import { AnomalyTypeIcon } from "../components/AnomalyTypeIcon";
 
 export function MiracleOverviewPage() {
   const { t, locale } = useLocale();
@@ -53,7 +54,10 @@ export function MiracleOverviewPage() {
             return (
               <li key={type} className={complete ? "done" : "open"}>
                 <div>
-                  <strong>{anomalyTypeLabel(type, locale)}</strong>
+                  <strong className="mh-type-status-title">
+                    <AnomalyTypeIcon type={type} size={28} onColorBg />
+                    {anomalyTypeLabel(type, locale)}
+                  </strong>
                   <span>
                     {p.got}/{p.total}
                     {complete

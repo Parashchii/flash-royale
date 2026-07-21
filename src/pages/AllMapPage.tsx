@@ -21,6 +21,7 @@ import {
 } from "../lib/mapCoords";
 import { useLocale } from "../i18n/LocaleContext";
 import { locName } from "../i18n/localize";
+import { anomalyTypeMarkerHtml } from "../components/AnomalyTypeIcon";
 
 type LayerId =
   | "flash-royale"
@@ -127,7 +128,7 @@ export function AllMapPage() {
         detail: f.notes,
         done: !worth,
         mapHref: `/miracle-hoarder?id=${f.id}`,
-        html: `<span class="mh-marker mh-marker-${worth ? "worth" : "done"}">◆</span>`,
+        html: anomalyTypeMarkerHtml(f.anomalyType, { done: !worth }),
       });
     }
 
@@ -229,11 +230,12 @@ export function AllMapPage() {
     group.clearLayers();
 
     for (const m of filtered) {
+      const size = m.layer === "miracle-hoarder" ? 36 : 28;
       const icon = L.divIcon({
         className: wrapClass(m.layer),
         html: m.html,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
       });
       const marker = L.marker(worldToLatLng(m.worldX, m.worldY), { icon });
       marker.on("click", () => {

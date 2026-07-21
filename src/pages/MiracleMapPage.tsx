@@ -22,12 +22,10 @@ import {
 } from "../lib/mapCoords";
 import { useLocale } from "../i18n/LocaleContext";
 import { anomalyTypeLabel, locName, locRegion } from "../i18n/localize";
-
-function markerHtml(worth: boolean, approx: boolean): string {
-  const tone = worth ? "worth" : "done";
-  const label = worth ? "◆" : "✓";
-  return `<span class="mh-marker mh-marker-${tone}${approx ? " mh-marker-approx" : ""}">${label}</span>`;
-}
+import {
+  AnomalyTypeIcon,
+  anomalyTypeMarkerHtml,
+} from "../components/AnomalyTypeIcon";
 
 export function MiracleMapPage() {
   const { t, locale } = useLocale();
@@ -121,9 +119,12 @@ export function MiracleMapPage() {
       const worth = missingTypes.has(f.anomalyType);
       const icon = L.divIcon({
         className: "mh-marker-wrap",
-        html: markerHtml(worth, Boolean(f.coordApprox)),
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
+        html: anomalyTypeMarkerHtml(f.anomalyType, {
+          done: !worth,
+          approx: Boolean(f.coordApprox),
+        }),
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
       });
       const marker = L.marker(worldToLatLng(f.worldX, f.worldY), { icon });
       marker.on("click", () => {
@@ -228,6 +229,7 @@ export function MiracleMapPage() {
               </span>
             </h2>
             <p className="flash-meta">
+              <AnomalyTypeIcon type={selected.anomalyType} size={18} />{" "}
               {anomalyTypeLabel(selected.anomalyType, locale)} ·{" "}
               {locRegion(selected, locale)}
               {selected.coordApprox ? ` · ${t("approxCoords")}` : ""}
@@ -276,10 +278,21 @@ export function MiracleMapPage() {
         </div>
       </div>
 
-      <p className="hint map-legend">
-        <span className="mh-marker mh-marker-worth legend-swatch">◆</span>{" "}
-        {t("legendWorth")}{" "}
-        <span className="mh-marker mh-marker-done legend-swatch">✓</span>{" "}
+      <p className="hint map-legend mh-map-legend">
+        {ANOMALY_TYPES.map((type) => (
+          <span key={type} className="mh-legend-type">
+            <span
+              className={`mh-marker mh-marker-type mh-marker-${type} mh-marker-worth legend-swatch`}
+            >
+              <AnomalyTypeIcon type={type} size={18} color="#fff8ef" />
+            </span>
+            {anomalyTypeLabel(type, locale)}
+          </span>
+        ))}
+        <span className="mh-legend-sep">·</span>
+        <span className="mh-marker mh-marker-done legend-swatch">
+          <AnomalyTypeIcon type="thermal" size={18} color="#e8ece8" />
+        </span>{" "}
         {t("legendTypeDone")} · {t("legendMiracleCoords")} · {t("legendTiles")}
       </p>
     </div>
