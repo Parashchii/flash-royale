@@ -6,6 +6,7 @@ export const api = {
     toggleCollected: "progress:toggleCollected",
     toggleVerified: "progress:toggleVerified",
     toggleArtifact: "progress:toggleArtifact",
+    setArtifactStatus: "progress:setArtifactStatus",
     toggleScanner: "progress:toggleScanner",
     toggleArchArtifact: "progress:toggleArchArtifact",
     setChoice: "progress:setChoice",

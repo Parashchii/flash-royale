@@ -7,6 +7,7 @@ export declare const api: {
     toggleCollected: any;
     toggleVerified: any;
     toggleArtifact: any;
+    setArtifactStatus: any;
     toggleScanner: any;
     toggleArchArtifact: any;
     setChoice: any;
