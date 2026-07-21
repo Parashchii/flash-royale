@@ -7,6 +7,7 @@ export default defineSchema({
     collectedKeys: v.array(v.string()),
     verifiedGearIds: v.optional(v.array(v.string())),
     collectedArtifactIds: v.optional(v.array(v.string())),
+    foundArtifactIds: v.optional(v.array(v.string())),
     collectedScannerIds: v.optional(v.array(v.string())),
     collectedArchArtifactIds: v.optional(v.array(v.string())),
     choices: v.object({

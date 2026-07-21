@@ -17,6 +17,7 @@ const emptyProgressArrays = {
   collectedKeys: [] as string[],
   verifiedGearIds: [] as string[],
   collectedArtifactIds: [] as string[],
+  foundArtifactIds: [] as string[],
   collectedScannerIds: [] as string[],
   collectedArchArtifactIds: [] as string[],
 };
@@ -44,6 +45,7 @@ export const getMine = query({
       collectedKeys: row.collectedKeys,
       verifiedGearIds: row.verifiedGearIds ?? [],
       collectedArtifactIds: row.collectedArtifactIds ?? [],
+      foundArtifactIds: row.foundArtifactIds ?? [],
       collectedScannerIds: row.collectedScannerIds ?? [],
       collectedArchArtifactIds: row.collectedArchArtifactIds ?? [],
       choices: row.choices,
@@ -143,6 +145,54 @@ export const toggleVerified = mutation({
   },
 });
 
+export const setArtifactStatus = mutation({
+  args: {
+    artifactId: v.string(),
+    status: v.union(
+      v.literal("missing"),
+      v.literal("found"),
+      v.literal("present"),
+    ),
+  },
+  handler: async (ctx, { artifactId, status }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    let row = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .unique();
+
+    const presentSeed =
+      status === "present" ? [artifactId] : ([] as string[]);
+    const foundSeed = status === "found" ? [artifactId] : ([] as string[]);
+
+    if (!row) {
+      await ctx.db.insert("userProgress", {
+        userId: identity.subject,
+        ...emptyProgressArrays,
+        collectedArtifactIds: presentSeed,
+        foundArtifactIds: foundSeed,
+        choices: emptyChoices,
+        updatedAt: Date.now(),
+      });
+      return;
+    }
+
+    const present = (row.collectedArtifactIds ?? []).filter(
+      (id) => id !== artifactId,
+    );
+    const found = (row.foundArtifactIds ?? []).filter((id) => id !== artifactId);
+
+    await ctx.db.patch(row._id, {
+      collectedArtifactIds:
+        status === "present" ? [...present, artifactId] : present,
+      foundArtifactIds: status === "found" ? [...found, artifactId] : found,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const toggleArtifact = mutation({
   args: { artifactId: v.string() },
   handler: async (ctx, { artifactId }) => {
@@ -158,21 +208,31 @@ export const toggleArtifact = mutation({
       await ctx.db.insert("userProgress", {
         userId: identity.subject,
         ...emptyProgressArrays,
-        collectedArtifactIds: [artifactId],
+        foundArtifactIds: [artifactId],
         choices: emptyChoices,
         updatedAt: Date.now(),
       });
       return;
     }
 
-    const current = row.collectedArtifactIds ?? [];
-    const has = current.includes(artifactId);
-    const collectedArtifactIds = has
-      ? current.filter((k) => k !== artifactId)
-      : [...current, artifactId];
+    const present = row.collectedArtifactIds ?? [];
+    const found = row.foundArtifactIds ?? [];
+    const isPresent = present.includes(artifactId);
+    const isFound = found.includes(artifactId);
+
+    let nextPresent = present.filter((id) => id !== artifactId);
+    let nextFound = found.filter((id) => id !== artifactId);
+    if (isPresent) {
+      // present -> missing
+    } else if (isFound) {
+      nextPresent = [...nextPresent, artifactId];
+    } else {
+      nextFound = [...nextFound, artifactId];
+    }
 
     await ctx.db.patch(row._id, {
-      collectedArtifactIds,
+      collectedArtifactIds: nextPresent,
+      foundArtifactIds: nextFound,
       updatedAt: Date.now(),
     });
   },
@@ -309,6 +369,7 @@ export const importProgress = mutation({
     collectedKeys: v.array(v.string()),
     verifiedGearIds: v.optional(v.array(v.string())),
     collectedArtifactIds: v.optional(v.array(v.string())),
+    foundArtifactIds: v.optional(v.array(v.string())),
     collectedScannerIds: v.optional(v.array(v.string())),
     collectedArchArtifactIds: v.optional(v.array(v.string())),
     choices: choicesValidator,
@@ -322,10 +383,17 @@ export const importProgress = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
       .unique();
 
+    const collectedArtifactIds = [...new Set(args.collectedArtifactIds ?? [])];
+    const presentSet = new Set(collectedArtifactIds);
+    const foundArtifactIds = [...new Set(args.foundArtifactIds ?? [])].filter(
+      (id) => !presentSet.has(id),
+    );
+
     const payload = {
       collectedKeys: [...new Set(args.collectedKeys)],
       verifiedGearIds: [...new Set(args.verifiedGearIds ?? [])],
-      collectedArtifactIds: [...new Set(args.collectedArtifactIds ?? [])],
+      collectedArtifactIds,
+      foundArtifactIds,
       collectedScannerIds: [...new Set(args.collectedScannerIds ?? [])],
       collectedArchArtifactIds: [
         ...new Set(args.collectedArchArtifactIds ?? []),

@@ -12,6 +12,7 @@ import {
 } from "react";
 import {
   EMPTY_CHOICES,
+  type ArtifactStatus,
   type ChoiceKey,
   type StoryChoices,
   type UserProgress,
@@ -23,6 +24,7 @@ type ProgressContextValue = {
   collectedKeys: Set<string>;
   verifiedGearIds: Set<string>;
   collectedArtifactIds: Set<string>;
+  foundArtifactIds: Set<string>;
   collectedScannerIds: Set<string>;
   collectedArchArtifactIds: Set<string>;
   choices: StoryChoices;
@@ -32,7 +34,10 @@ type ProgressContextValue = {
   cloudReady: boolean;
   toggleCollected: (blueprintKey: string) => void;
   toggleVerified: (gearId: string) => void;
+  /** @deprecated Prefer setArtifactStatus */
   toggleArtifact: (artifactId: string) => void;
+  setArtifactStatus: (artifactId: string, status: ArtifactStatus) => void;
+  getArtifactStatus: (artifactId: string) => ArtifactStatus;
   toggleScanner: (scannerId: string) => void;
   toggleArchArtifact: (archId: string) => void;
   setChoice: (key: ChoiceKey, value: boolean | null) => void;
@@ -43,15 +48,61 @@ type ProgressContextValue = {
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
 
+function exclusiveArtifactLists(
+  present: string[],
+  found: string[],
+): { collectedArtifactIds: string[]; foundArtifactIds: string[] } {
+  const collectedArtifactIds = [...new Set(present)];
+  const presentSet = new Set(collectedArtifactIds);
+  const foundArtifactIds = [...new Set(found)].filter((id) => !presentSet.has(id));
+  return { collectedArtifactIds, foundArtifactIds };
+}
+
 function normalizeProgress(parsed: Partial<UserProgress> | null): UserProgress {
+  const { collectedArtifactIds, foundArtifactIds } = exclusiveArtifactLists(
+    parsed?.collectedArtifactIds ?? [],
+    parsed?.foundArtifactIds ?? [],
+  );
   return {
     collectedKeys: [...new Set(parsed?.collectedKeys ?? [])],
     verifiedGearIds: [...new Set(parsed?.verifiedGearIds ?? [])],
-    collectedArtifactIds: [...new Set(parsed?.collectedArtifactIds ?? [])],
+    collectedArtifactIds,
+    foundArtifactIds,
     collectedScannerIds: [...new Set(parsed?.collectedScannerIds ?? [])],
     collectedArchArtifactIds: [...new Set(parsed?.collectedArchArtifactIds ?? [])],
     choices: { ...EMPTY_CHOICES, ...parsed?.choices },
     updatedAt: parsed?.updatedAt ?? 0,
+  };
+}
+
+function applyArtifactStatus(
+  prev: UserProgress,
+  artifactId: string,
+  status: ArtifactStatus,
+): UserProgress {
+  const withoutPresent = prev.collectedArtifactIds.filter((id) => id !== artifactId);
+  const withoutFound = prev.foundArtifactIds.filter((id) => id !== artifactId);
+  if (status === "present") {
+    return {
+      ...prev,
+      collectedArtifactIds: [...withoutPresent, artifactId],
+      foundArtifactIds: withoutFound,
+      updatedAt: Date.now(),
+    };
+  }
+  if (status === "found") {
+    return {
+      ...prev,
+      collectedArtifactIds: withoutPresent,
+      foundArtifactIds: [...withoutFound, artifactId],
+      updatedAt: Date.now(),
+    };
+  }
+  return {
+    ...prev,
+    collectedArtifactIds: withoutPresent,
+    foundArtifactIds: withoutFound,
+    updatedAt: Date.now(),
   };
 }
 
@@ -82,10 +133,20 @@ function useLocalProgressState(): ProgressContextValue {
   }, [progress]);
 
   return useMemo(() => {
+    const collectedArtifactIds = new Set(progress.collectedArtifactIds);
+    const foundArtifactIds = new Set(progress.foundArtifactIds);
+
+    const getArtifactStatus = (artifactId: string): ArtifactStatus => {
+      if (collectedArtifactIds.has(artifactId)) return "present";
+      if (foundArtifactIds.has(artifactId)) return "found";
+      return "missing";
+    };
+
     return {
       collectedKeys: new Set(progress.collectedKeys),
       verifiedGearIds: new Set(progress.verifiedGearIds),
-      collectedArtifactIds: new Set(progress.collectedArtifactIds),
+      collectedArtifactIds,
+      foundArtifactIds,
       collectedScannerIds: new Set(progress.collectedScannerIds),
       collectedArchArtifactIds: new Set(progress.collectedArchArtifactIds),
       choices: progress.choices,
@@ -113,13 +174,24 @@ function useLocalProgressState(): ProgressContextValue {
       },
       toggleArtifact: (artifactId: string) => {
         setProgress((prev) => {
-          const has = prev.collectedArtifactIds.includes(artifactId);
-          const collectedArtifactIds = has
-            ? prev.collectedArtifactIds.filter((k) => k !== artifactId)
-            : [...prev.collectedArtifactIds, artifactId];
-          return { ...prev, collectedArtifactIds, updatedAt: Date.now() };
+          const status = prev.collectedArtifactIds.includes(artifactId)
+            ? "present"
+            : prev.foundArtifactIds.includes(artifactId)
+              ? "found"
+              : "missing";
+          const next: ArtifactStatus =
+            status === "missing"
+              ? "found"
+              : status === "found"
+                ? "present"
+                : "missing";
+          return applyArtifactStatus(prev, artifactId, next);
         });
       },
+      setArtifactStatus: (artifactId: string, status: ArtifactStatus) => {
+        setProgress((prev) => applyArtifactStatus(prev, artifactId, status));
+      },
+      getArtifactStatus,
       toggleScanner: (scannerId: string) => {
         setProgress((prev) => {
           const has = prev.collectedScannerIds.includes(scannerId);
@@ -170,7 +242,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
   const ensure = useMutation(api.progress.ensure);
   const toggleRemote = useMutation(api.progress.toggleCollected);
   const toggleVerifiedRemote = useMutation(api.progress.toggleVerified);
-  const toggleArtifactRemote = useMutation(api.progress.toggleArtifact);
+  const setArtifactStatusRemote = useMutation(api.progress.setArtifactStatus);
   const toggleScannerRemote = useMutation(api.progress.toggleScanner);
   const toggleArchArtifactRemote = useMutation(api.progress.toggleArchArtifact);
   const setChoiceRemote = useMutation(api.progress.setChoice);
@@ -195,9 +267,16 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
   const verifiedList = usingCloud
     ? (remote!.verifiedGearIds ?? [])
     : localFallback.verifiedGearIds;
-  const artifactList = usingCloud
-    ? (remote!.collectedArtifactIds ?? [])
-    : localFallback.collectedArtifactIds;
+  const artifactLists = exclusiveArtifactLists(
+    usingCloud
+      ? (remote!.collectedArtifactIds ?? [])
+      : localFallback.collectedArtifactIds,
+    usingCloud
+      ? (remote!.foundArtifactIds ?? [])
+      : localFallback.foundArtifactIds,
+  );
+  const artifactList = artifactLists.collectedArtifactIds;
+  const foundList = artifactLists.foundArtifactIds;
   const scannerList = usingCloud
     ? (remote!.collectedScannerIds ?? [])
     : localFallback.collectedScannerIds;
@@ -206,6 +285,21 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
     : localFallback.collectedArchArtifactIds;
   const choices = usingCloud ? remote!.choices : localFallback.choices;
   const updatedAt = usingCloud ? remote!.updatedAt : localFallback.updatedAt;
+
+  const collectedArtifactIds = useMemo(
+    () => new Set(artifactList),
+    [artifactList],
+  );
+  const foundArtifactIds = useMemo(() => new Set(foundList), [foundList]);
+
+  const getArtifactStatus = useCallback(
+    (artifactId: string): ArtifactStatus => {
+      if (collectedArtifactIds.has(artifactId)) return "present";
+      if (foundArtifactIds.has(artifactId)) return "found";
+      return "missing";
+    },
+    [collectedArtifactIds, foundArtifactIds],
+  );
 
   const toggleCollected = useCallback(
     (blueprintKey: string) => {
@@ -241,21 +335,29 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
     [isSignedIn, toggleVerifiedRemote],
   );
 
-  const toggleArtifact = useCallback(
-    (artifactId: string) => {
+  const setArtifactStatus = useCallback(
+    (artifactId: string, status: ArtifactStatus) => {
       if (isSignedIn) {
-        void toggleArtifactRemote({ artifactId });
+        void setArtifactStatusRemote({ artifactId, status });
         return;
       }
-      setLocalFallback((prev) => {
-        const has = prev.collectedArtifactIds.includes(artifactId);
-        const next = has
-          ? prev.collectedArtifactIds.filter((k) => k !== artifactId)
-          : [...prev.collectedArtifactIds, artifactId];
-        return { ...prev, collectedArtifactIds: next, updatedAt: Date.now() };
-      });
+      setLocalFallback((prev) => applyArtifactStatus(prev, artifactId, status));
     },
-    [isSignedIn, toggleArtifactRemote],
+    [isSignedIn, setArtifactStatusRemote],
+  );
+
+  const toggleArtifact = useCallback(
+    (artifactId: string) => {
+      const status = getArtifactStatus(artifactId);
+      const next: ArtifactStatus =
+        status === "missing"
+          ? "found"
+          : status === "found"
+            ? "present"
+            : "missing";
+      setArtifactStatus(artifactId, next);
+    },
+    [getArtifactStatus, setArtifactStatus],
   );
 
   const toggleScanner = useCallback(
@@ -326,6 +428,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
           collectedKeys: collectedList,
           verifiedGearIds: verifiedList,
           collectedArtifactIds: artifactList,
+          foundArtifactIds: foundList,
           collectedScannerIds: scannerList,
           collectedArchArtifactIds: archList,
           choices,
@@ -338,6 +441,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       collectedList,
       verifiedList,
       artifactList,
+      foundList,
       scannerList,
       archList,
       choices,
@@ -348,10 +452,15 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
   const importJson = useCallback(
     (raw: string) => {
       const parsed = JSON.parse(raw) as Partial<UserProgress>;
+      const lists = exclusiveArtifactLists(
+        parsed.collectedArtifactIds ?? [],
+        parsed.foundArtifactIds ?? [],
+      );
       const payload = {
         collectedKeys: [...new Set(parsed.collectedKeys ?? [])],
         verifiedGearIds: [...new Set(parsed.verifiedGearIds ?? [])],
-        collectedArtifactIds: [...new Set(parsed.collectedArtifactIds ?? [])],
+        collectedArtifactIds: lists.collectedArtifactIds,
+        foundArtifactIds: lists.foundArtifactIds,
         collectedScannerIds: [...new Set(parsed.collectedScannerIds ?? [])],
         collectedArchArtifactIds: [
           ...new Set(parsed.collectedArchArtifactIds ?? []),
@@ -371,7 +480,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
     () => ({
       collectedKeys: new Set(collectedList),
       verifiedGearIds: new Set(verifiedList),
-      collectedArtifactIds: new Set(artifactList),
+      collectedArtifactIds,
+      foundArtifactIds,
       collectedScannerIds: new Set(scannerList),
       collectedArchArtifactIds: new Set(archList),
       choices,
@@ -382,6 +492,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       toggleCollected,
       toggleVerified,
       toggleArtifact,
+      setArtifactStatus,
+      getArtifactStatus,
       toggleScanner,
       toggleArchArtifact,
       setChoice,
@@ -392,7 +504,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
     [
       collectedList,
       verifiedList,
-      artifactList,
+      collectedArtifactIds,
+      foundArtifactIds,
       scannerList,
       archList,
       choices,
@@ -403,6 +516,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       toggleCollected,
       toggleVerified,
       toggleArtifact,
+      setArtifactStatus,
+      getArtifactStatus,
       toggleScanner,
       toggleArchArtifact,
       setChoice,

@@ -111,6 +111,8 @@ export type ArchArtifact = {
   notes?: string;
 };
 
+export type ArtifactStatus = "missing" | "found" | "present";
+
 export type StoryChoices = {
   spark: boolean | null;
   polissya: boolean | null;
@@ -121,8 +123,16 @@ export type UserProgress = {
   collectedKeys: string[];
   /** Gear IDs marked as checked in the PDA audit screen. */
   verifiedGearIds: string[];
-  /** Artifact IDs collected for Miracle Hoarder. */
+  /**
+   * Miracle Hoarder: artifacts currently present in inventory/stash.
+   * Counts toward the achievement.
+   */
   collectedArtifactIds: string[];
+  /**
+   * Miracle Hoarder: artifacts seen/found in an anomaly field,
+   * but not (yet) held for the achievement.
+   */
+  foundArtifactIds: string[];
   /** Scanner IDs activated for Scanning Complete. */
   collectedScannerIds: string[];
   /** Arch-artifact IDs collected for Curiouser and Curiouser! */
