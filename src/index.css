@@ -1334,19 +1334,20 @@ textarea {
   border-radius: 50%;
   font-size: 0.75rem;
   font-weight: 700;
-  border: 2px solid #1a1712;
+  border: 0;
   box-shadow: 0 1px 4px #000a;
-  color: #1a1712;
+  color: #121410;
 }
 
 .sc-marker-missing {
-  background: #5cb85c;
+  background: #8b9199;
+  color: #121410;
 }
 
 .sc-marker-collected {
-  background: #3d6b3d;
-  color: #c8e0c8;
-  opacity: 0.85;
+  background: #5a6068;
+  color: #d7dce0;
+  opacity: 0.88;
 }
 
 .aa-marker-wrap {
