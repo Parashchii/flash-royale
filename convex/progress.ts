@@ -20,6 +20,8 @@ const emptyProgressArrays = {
   foundArtifactIds: [] as string[],
   collectedScannerIds: [] as string[],
   collectedArchArtifactIds: [] as string[],
+  collectedNonStopIds: [] as string[],
+  inaccessibleRegions: [] as string[],
 };
 
 export const getMine = query({
@@ -48,6 +50,8 @@ export const getMine = query({
       foundArtifactIds: row.foundArtifactIds ?? [],
       collectedScannerIds: row.collectedScannerIds ?? [],
       collectedArchArtifactIds: row.collectedArchArtifactIds ?? [],
+      collectedNonStopIds: row.collectedNonStopIds ?? [],
+      inaccessibleRegions: row.inaccessibleRegions ?? [],
       choices: row.choices,
       updatedAt: row.updatedAt,
     };
@@ -308,6 +312,76 @@ export const toggleArchArtifact = mutation({
   },
 });
 
+export const toggleNonStop = mutation({
+  args: { canId: v.string() },
+  handler: async (ctx, { canId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    let row = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .unique();
+
+    if (!row) {
+      await ctx.db.insert("userProgress", {
+        userId: identity.subject,
+        ...emptyProgressArrays,
+        collectedNonStopIds: [canId],
+        choices: emptyChoices,
+        updatedAt: Date.now(),
+      });
+      return;
+    }
+
+    const current = row.collectedNonStopIds ?? [];
+    const has = current.includes(canId);
+    const collectedNonStopIds = has
+      ? current.filter((k) => k !== canId)
+      : [...current, canId];
+
+    await ctx.db.patch(row._id, {
+      collectedNonStopIds,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const toggleInaccessibleRegion = mutation({
+  args: { region: v.string() },
+  handler: async (ctx, { region }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    let row = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .unique();
+
+    if (!row) {
+      await ctx.db.insert("userProgress", {
+        userId: identity.subject,
+        ...emptyProgressArrays,
+        inaccessibleRegions: [region],
+        choices: emptyChoices,
+        updatedAt: Date.now(),
+      });
+      return;
+    }
+
+    const current = row.inaccessibleRegions ?? [];
+    const has = current.includes(region);
+    const inaccessibleRegions = has
+      ? current.filter((k) => k !== region)
+      : [...current, region];
+
+    await ctx.db.patch(row._id, {
+      inaccessibleRegions,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const setChoice = mutation({
   args: {
     key: v.union(
@@ -372,6 +446,8 @@ export const importProgress = mutation({
     foundArtifactIds: v.optional(v.array(v.string())),
     collectedScannerIds: v.optional(v.array(v.string())),
     collectedArchArtifactIds: v.optional(v.array(v.string())),
+    collectedNonStopIds: v.optional(v.array(v.string())),
+    inaccessibleRegions: v.optional(v.array(v.string())),
     choices: choicesValidator,
   },
   handler: async (ctx, args) => {
@@ -398,6 +474,8 @@ export const importProgress = mutation({
       collectedArchArtifactIds: [
         ...new Set(args.collectedArchArtifactIds ?? []),
       ],
+      collectedNonStopIds: [...new Set(args.collectedNonStopIds ?? [])],
+      inaccessibleRegions: [...new Set(args.inaccessibleRegions ?? [])],
       choices: args.choices,
       updatedAt: Date.now(),
     };

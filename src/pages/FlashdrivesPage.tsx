@@ -11,6 +11,8 @@ import {
 import type { GearCategory } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import { statusOf } from "../lib/status";
+import { FilterCard, FilterChoiceList } from "../components/FilterCard";
+import { ListToolbar } from "../components/ListToolbar";
 
 type StatusFilter = "all" | "missing" | "collected" | "locked" | "locked_missed";
 
@@ -64,80 +66,81 @@ export function FlashdrivesPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>Список</h1>
+      <header className="page-header mh-list-header">
         <p>
           {filtered.length} з {TOTAL_UNIQUE} унікальних креслень
         </p>
+        <ListToolbar
+          search={q}
+          onSearch={setQ}
+          searchPlaceholder="назва, регіон…"
+        />
       </header>
 
-      <div className="filters sticky-filters">
-        <label>
-          Пошук
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="назва, регіон…"
+      <div className="filter-card-stack">
+        <FilterCard title="Регіон">
+          <FilterChoiceList
+            label="Регіон"
+            value={region}
+            onChange={setRegion}
+            options={[
+              { value: "all", label: "Усі" },
+              ...REGIONS.map((r) => ({ value: r, label: r })),
+            ]}
           />
-        </label>
-        <label>
-          Регіон
-          <select value={region} onChange={(e) => setRegion(e.target.value)}>
-            <option value="all">Усі</option>
-            {REGIONS.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Тип
-          <select
+        </FilterCard>
+        <FilterCard title="Тип">
+          <FilterChoiceList
+            label="Тип"
             value={category}
-            onChange={(e) => {
-              setCategory(e.target.value as typeof category);
+            onChange={(next) => {
+              setCategory(next as typeof category);
               setGearId("all");
             }}
-          >
-            <option value="all">Усі</option>
-            <option value="weapon">Зброя</option>
-            <option value="helmet">Шоломи</option>
-            <option value="armor">Броня</option>
-          </select>
-        </label>
-        <label>
-          Предмет
-          <select value={gearId} onChange={(e) => setGearId(e.target.value)}>
-            <option value="all">Усі</option>
-            {gearOptions.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.nameUk}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Статус
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as StatusFilter)}
-          >
-            <option value="all">Усі</option>
-            <option value="missing">Не зібрано</option>
-            <option value="collected">Зібрано</option>
-            <option value="locked">Сюжет / можна пропустити</option>
-            <option value="locked_missed">Заблоковано вибором</option>
-          </select>
-        </label>
-        <label className="check-label">
-          <input
-            type="checkbox"
-            checked={spoilers}
-            onChange={(e) => setSpoilers(e.target.checked)}
+            options={[
+              { value: "all", label: "Усі" },
+              { value: "weapon", label: "Зброя" },
+              { value: "helmet", label: "Шоломи" },
+              { value: "armor", label: "Броня" },
+            ]}
           />
-          Показати спойлери
-        </label>
+        </FilterCard>
+        <FilterCard title="Предмет">
+          <FilterChoiceList
+            label="Предмет"
+            value={gearId}
+            onChange={setGearId}
+            options={[
+              { value: "all", label: "Усі" },
+              ...gearOptions.map((g) => ({ value: g.id, label: g.nameUk })),
+            ]}
+          />
+        </FilterCard>
+        <FilterCard title="Статус">
+          <FilterChoiceList
+            label="Статус"
+            value={status}
+            variant="chips"
+            onChange={(next) => setStatus(next as StatusFilter)}
+            options={[
+              { value: "all", label: "Усі" },
+              { value: "missing", label: "Не зібрано" },
+              { value: "collected", label: "Зібрано" },
+              { value: "locked", label: "Сюжет / можна пропустити" },
+              { value: "locked_missed", label: "Заблоковано вибором" },
+            ]}
+          />
+        </FilterCard>
+        <FilterCard title="Спойлери">
+          <label className="check-label">
+            <input
+              type="checkbox"
+              checked={spoilers}
+              onChange={(e) => setSpoilers(e.target.checked)}
+            />
+            Показати спойлери
+          </label>
+        </FilterCard>
       </div>
 
       <ul className="flash-list">

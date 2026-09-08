@@ -27,6 +27,8 @@ type ProgressContextValue = {
   foundArtifactIds: Set<string>;
   collectedScannerIds: Set<string>;
   collectedArchArtifactIds: Set<string>;
+  collectedNonStopIds: Set<string>;
+  inaccessibleRegions: Set<string>;
   choices: StoryChoices;
   updatedAt: number;
   mode: "local" | "cloud";
@@ -40,6 +42,8 @@ type ProgressContextValue = {
   getArtifactStatus: (artifactId: string) => ArtifactStatus;
   toggleScanner: (scannerId: string) => void;
   toggleArchArtifact: (archId: string) => void;
+  toggleNonStop: (canId: string) => void;
+  toggleInaccessibleRegion: (region: string) => void;
   setChoice: (key: ChoiceKey, value: boolean | null) => void;
   reset: () => void;
   exportJson: () => string;
@@ -70,6 +74,8 @@ function normalizeProgress(parsed: Partial<UserProgress> | null): UserProgress {
     foundArtifactIds,
     collectedScannerIds: [...new Set(parsed?.collectedScannerIds ?? [])],
     collectedArchArtifactIds: [...new Set(parsed?.collectedArchArtifactIds ?? [])],
+    collectedNonStopIds: [...new Set(parsed?.collectedNonStopIds ?? [])],
+    inaccessibleRegions: [...new Set(parsed?.inaccessibleRegions ?? [])],
     choices: { ...EMPTY_CHOICES, ...parsed?.choices },
     updatedAt: parsed?.updatedAt ?? 0,
   };
@@ -149,6 +155,8 @@ function useLocalProgressState(): ProgressContextValue {
       foundArtifactIds,
       collectedScannerIds: new Set(progress.collectedScannerIds),
       collectedArchArtifactIds: new Set(progress.collectedArchArtifactIds),
+      collectedNonStopIds: new Set(progress.collectedNonStopIds),
+      inaccessibleRegions: new Set(progress.inaccessibleRegions),
       choices: progress.choices,
       updatedAt: progress.updatedAt,
       mode: "local" as const,
@@ -210,6 +218,24 @@ function useLocalProgressState(): ProgressContextValue {
           return { ...prev, collectedArchArtifactIds, updatedAt: Date.now() };
         });
       },
+      toggleNonStop: (canId: string) => {
+        setProgress((prev) => {
+          const has = prev.collectedNonStopIds.includes(canId);
+          const collectedNonStopIds = has
+            ? prev.collectedNonStopIds.filter((k) => k !== canId)
+            : [...prev.collectedNonStopIds, canId];
+          return { ...prev, collectedNonStopIds, updatedAt: Date.now() };
+        });
+      },
+      toggleInaccessibleRegion: (region: string) => {
+        setProgress((prev) => {
+          const has = prev.inaccessibleRegions.includes(region);
+          const inaccessibleRegions = has
+            ? prev.inaccessibleRegions.filter((k) => k !== region)
+            : [...prev.inaccessibleRegions, region];
+          return { ...prev, inaccessibleRegions, updatedAt: Date.now() };
+        });
+      },
       setChoice: (key: ChoiceKey, value: boolean | null) => {
         setProgress((prev) => ({
           ...prev,
@@ -245,6 +271,10 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
   const setArtifactStatusRemote = useMutation(api.progress.setArtifactStatus);
   const toggleScannerRemote = useMutation(api.progress.toggleScanner);
   const toggleArchArtifactRemote = useMutation(api.progress.toggleArchArtifact);
+  const toggleNonStopRemote = useMutation(api.progress.toggleNonStop);
+  const toggleInaccessibleRegionRemote = useMutation(
+    api.progress.toggleInaccessibleRegion,
+  );
   const setChoiceRemote = useMutation(api.progress.setChoice);
   const resetRemote = useMutation(api.progress.reset);
   const importRemote = useMutation(api.progress.importProgress);
@@ -283,6 +313,12 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
   const archList = usingCloud
     ? (remote!.collectedArchArtifactIds ?? [])
     : localFallback.collectedArchArtifactIds;
+  const nonStopList = usingCloud
+    ? (remote!.collectedNonStopIds ?? [])
+    : localFallback.collectedNonStopIds;
+  const inaccessibleList = usingCloud
+    ? (remote!.inaccessibleRegions ?? [])
+    : localFallback.inaccessibleRegions;
   const choices = usingCloud ? remote!.choices : localFallback.choices;
   const updatedAt = usingCloud ? remote!.updatedAt : localFallback.updatedAt;
 
@@ -398,6 +434,48 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
     [isSignedIn, toggleArchArtifactRemote],
   );
 
+  const toggleNonStop = useCallback(
+    (canId: string) => {
+      if (isSignedIn) {
+        void toggleNonStopRemote({ canId });
+        return;
+      }
+      setLocalFallback((prev) => {
+        const has = prev.collectedNonStopIds.includes(canId);
+        const next = has
+          ? prev.collectedNonStopIds.filter((k) => k !== canId)
+          : [...prev.collectedNonStopIds, canId];
+        return {
+          ...prev,
+          collectedNonStopIds: next,
+          updatedAt: Date.now(),
+        };
+      });
+    },
+    [isSignedIn, toggleNonStopRemote],
+  );
+
+  const toggleInaccessibleRegion = useCallback(
+    (region: string) => {
+      if (isSignedIn) {
+        void toggleInaccessibleRegionRemote({ region });
+        return;
+      }
+      setLocalFallback((prev) => {
+        const has = prev.inaccessibleRegions.includes(region);
+        const next = has
+          ? prev.inaccessibleRegions.filter((k) => k !== region)
+          : [...prev.inaccessibleRegions, region];
+        return {
+          ...prev,
+          inaccessibleRegions: next,
+          updatedAt: Date.now(),
+        };
+      });
+    },
+    [isSignedIn, toggleInaccessibleRegionRemote],
+  );
+
   const setChoice = useCallback(
     (key: ChoiceKey, value: boolean | null) => {
       if (isSignedIn) {
@@ -431,6 +509,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
           foundArtifactIds: foundList,
           collectedScannerIds: scannerList,
           collectedArchArtifactIds: archList,
+          collectedNonStopIds: nonStopList,
+          inaccessibleRegions: inaccessibleList,
           choices,
           updatedAt,
         },
@@ -444,6 +524,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       foundList,
       scannerList,
       archList,
+      nonStopList,
+      inaccessibleList,
       choices,
       updatedAt,
     ],
@@ -465,6 +547,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
         collectedArchArtifactIds: [
           ...new Set(parsed.collectedArchArtifactIds ?? []),
         ],
+        collectedNonStopIds: [...new Set(parsed.collectedNonStopIds ?? [])],
+        inaccessibleRegions: [...new Set(parsed.inaccessibleRegions ?? [])],
         choices: { ...EMPTY_CHOICES, ...parsed.choices },
       };
       if (isSignedIn) {
@@ -484,6 +568,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       foundArtifactIds,
       collectedScannerIds: new Set(scannerList),
       collectedArchArtifactIds: new Set(archList),
+      collectedNonStopIds: new Set(nonStopList),
+      inaccessibleRegions: new Set(inaccessibleList),
       choices,
       updatedAt,
       mode: isSignedIn ? "cloud" : "local",
@@ -496,6 +582,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       getArtifactStatus,
       toggleScanner,
       toggleArchArtifact,
+      toggleNonStop,
+      toggleInaccessibleRegion,
       setChoice,
       reset,
       exportJson,
@@ -508,6 +596,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       foundArtifactIds,
       scannerList,
       archList,
+      nonStopList,
+      inaccessibleList,
       choices,
       updatedAt,
       isSignedIn,
@@ -520,6 +610,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       getArtifactStatus,
       toggleScanner,
       toggleArchArtifact,
+      toggleNonStop,
+      toggleInaccessibleRegion,
       setChoice,
       reset,
       exportJson,

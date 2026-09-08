@@ -10,6 +10,8 @@ export declare const api: {
     setArtifactStatus: any;
     toggleScanner: any;
     toggleArchArtifact: any;
+    toggleNonStop: any;
+    toggleInaccessibleRegion: any;
     setChoice: any;
     reset: any;
     importProgress: any;

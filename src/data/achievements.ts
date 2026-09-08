@@ -1,6 +1,7 @@
 import {
   TOTAL_ARCH_ARTIFACTS,
   TOTAL_ARTIFACTS,
+  TOTAL_NON_STOP,
   TOTAL_SCANNERS,
   TOTAL_UNIQUE,
 } from "./catalog";
@@ -10,6 +11,7 @@ export type AchievementId =
   | "miracle-hoarder"
   | "scanning-complete"
   | "curiouser-curiouser"
+  | "non-stop"
   | "show-all";
 
 export type AchievementMeta = {
@@ -50,6 +52,13 @@ export const ACHIEVEMENTS: Record<AchievementId, AchievementMeta> = {
     brandLabel: "Curiouser and Curiouser!",
     totalItems: TOTAL_ARCH_ARTIFACTS,
   },
+  "non-stop": {
+    id: "non-stop",
+    nameEn: "Non-Stop Limited",
+    nameUk: "Non-Stop Limited",
+    brandLabel: "Non-Stop",
+    totalItems: TOTAL_NON_STOP,
+  },
   "show-all": {
     id: "show-all",
     nameEn: "Show all",
@@ -72,6 +81,7 @@ export function isAchievementId(
     value === "miracle-hoarder" ||
     value === "scanning-complete" ||
     value === "curiouser-curiouser" ||
+    value === "non-stop" ||
     value === "show-all"
   );
 }

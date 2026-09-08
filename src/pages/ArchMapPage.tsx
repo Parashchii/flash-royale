@@ -12,15 +12,25 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locAnomaly, locName, locRegion } from "../i18n/localize";
+import { GuaranteeFab } from "../components/GuaranteeFab";
+import { MapLegend } from "../components/MapLegend";
+import { MapSidePanel } from "../components/MapSidePanel";
+import { MapDocsDrawer } from "../components/MapDocsDrawer";
+import { ArchListPage } from "./ArchListPage";
+import { ArchOverviewPage } from "./ArchOverviewPage";
+import {
+  StarGlyph,
+  TRACKER_MARKER_SIZE,
+  archMarkerHtml,
+} from "../components/TrackerMarkerGlyphs";
 
 type StatusFilter = "all" | "missing" | "collected";
 
 function markerHtml(got: boolean): string {
-  const tone = got ? "collected" : "missing";
-  const label = got ? "✓" : "◆";
-  return `<span class="aa-marker aa-marker-${tone}">${label}</span>`;
+  return archMarkerHtml(got);
 }
 
 export function ArchMapPage() {
@@ -64,10 +74,9 @@ export function ArchMapPage() {
       maxZoom: 7,
       maxBounds: MAP_BOUNDS.pad(0.05),
       zoomControl: false,
-      attributionControl: true,
+      attributionControl: false,
     });
 
-    L.control.zoom({ position: "bottomright" }).addTo(map);
     L.tileLayer(TILE_URL, {
       tileSize: 512,
       maxZoom: 7,
@@ -77,6 +86,7 @@ export function ArchMapPage() {
       attribution: TILE_ATTR,
     }).addTo(map);
 
+    addRegionHoverLayer(map);
     const group = L.layerGroup().addTo(map);
     mapRef.current = map;
     layerRef.current = group;
@@ -103,8 +113,8 @@ export function ArchMapPage() {
       const icon = L.divIcon({
         className: "aa-marker-wrap",
         html: markerHtml(got),
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
+        iconSize: [TRACKER_MARKER_SIZE, TRACKER_MARKER_SIZE],
+        iconAnchor: [TRACKER_MARKER_SIZE / 2, TRACKER_MARKER_SIZE / 2],
       });
       const marker = L.marker(worldToLatLng(a.worldX, a.worldY), { icon });
       marker.on("click", () => {
@@ -148,8 +158,57 @@ export function ArchMapPage() {
 
   return (
     <div className="page map-page">
-      <section className="guarantee-card" aria-labelledby="arch-map-title">
-        <h2 id="arch-map-title">{t("archGuaranteeTitle")}</h2>
+      <div className="map-tools">
+        <MapSidePanel title={t("mapPanelTitle")}>
+          <div className="map-filters-card">
+            <div className="filters map-filters">
+              <label>
+                {t("region")}
+                <select
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                >
+                  <option value="all">{t("statusAll")}</option>
+                  {ARCH_REGIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t("status")}
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as StatusFilter)}
+                >
+                  <option value="all">{t("statusAll")}</option>
+                  <option value="missing">{t("statusMissing")}</option>
+                  <option value="collected">{t("statusCollected")}</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <MapLegend>
+            <ul className="hint map-legend">
+            <li>
+              <span className="aa-marker aa-marker-missing legend-swatch">
+                <StarGlyph size={16} />
+              </span>
+              {t("legendMissing")}
+            </li>
+            <li>
+              <span className="aa-marker aa-marker-collected legend-swatch">
+                <StarGlyph size={16} />
+              </span>
+              {t("legendCollected")}
+            </li>
+            <li>{t("legendArchSources")}</li>
+            </ul>
+          </MapLegend>
+        </MapSidePanel>
+        <GuaranteeFab title={t("archGuaranteeTitle")}>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -172,7 +231,13 @@ export function ArchMapPage() {
             <span>{t("archGuarantee2")}</span>
           </li>
         </ul>
-      </section>
+      </GuaranteeFab>
+      </div>
+
+      <MapDocsDrawer
+        list={<ArchListPage />}
+        overview={<ArchOverviewPage />}
+      />
 
       <div className="map-stage">
         <div
@@ -218,7 +283,7 @@ export function ArchMapPage() {
               </button>
               <Link
                 className="btn btn-ghost"
-                to={`/curiouser-curiouser/list?q=${encodeURIComponent(locName(selected, locale))}`}
+                to={`/curiouser-curiouser?view=list&q=${encodeURIComponent(locName(selected, locale))}`}
               >
                 {t("listTitle")}
               </Link>
@@ -226,43 +291,6 @@ export function ArchMapPage() {
           </aside>
         )}
       </div>
-
-      <div className="map-filters-card">
-        <div className="filters map-filters">
-          <label>
-            {t("region")}
-            <select
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-            >
-              <option value="all">{t("statusAll")}</option>
-              {ARCH_REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t("status")}
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as StatusFilter)}
-            >
-              <option value="all">{t("statusAll")}</option>
-              <option value="missing">{t("statusMissing")}</option>
-              <option value="collected">{t("statusCollected")}</option>
-            </select>
-          </label>
-        </div>
-      </div>
-
-      <p className="hint map-legend">
-        <span className="aa-marker aa-marker-missing legend-swatch">◆</span>{" "}
-        {t("legendMissing")}{" "}
-        <span className="aa-marker aa-marker-collected legend-swatch">✓</span>{" "}
-        {t("legendCollected")} · {t("legendArchSources")} · {t("legendTiles")}
-      </p>
     </div>
   );
 }

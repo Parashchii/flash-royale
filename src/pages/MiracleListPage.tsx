@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   ARTIFACTS,
-  TOTAL_ARTIFACTS,
   artifactTypeProgress,
+  trackedArtifactIds,
 } from "../data/catalog";
 import {
   ANOMALY_TYPES,
@@ -15,15 +15,15 @@ import {
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
 import { anomalyTypeLabel, locName } from "../i18n/localize";
-import type { Locale } from "../i18n/messages";
+import type { Locale, MessageKey } from "../i18n/messages";
 import { AnomalyTypeIcon } from "../components/AnomalyTypeIcon";
+import { AnomalyTypeFilter, FilterCard, FilterChoiceList } from "../components/FilterCard";
+import { ListToolbar } from "../components/ListToolbar";
 
 type StatusFilter = "all" | ArtifactStatus;
 type ViewMode = "list" | "grid";
 
 const VIEW_STORAGE_KEY = "miracle-hoarder-list-view";
-
-const STATUS_OPTIONS: ArtifactStatus[] = ["missing", "found", "present"];
 
 const RARITY_ORDER: ArtifactRarity[] = [
   "common",
@@ -31,6 +31,13 @@ const RARITY_ORDER: ArtifactRarity[] = [
   "rare",
   "legendary",
 ];
+
+const RARITY_LABEL: Record<ArtifactRarity, MessageKey> = {
+  common: "rarityCommon",
+  uncommon: "rarityUncommon",
+  rare: "rarityRare",
+  legendary: "rarityLegendary",
+};
 
 function rarityRank(rarity: ArtifactRarity | undefined) {
   if (!rarity) return RARITY_ORDER.length;
@@ -58,42 +65,6 @@ function readStoredView(): ViewMode {
 
 function artifactIconSrc(id: string) {
   return `/artifacts/${id}.png?v=2`;
-}
-
-function StatusPicker({
-  value,
-  artifactName,
-  onChange,
-}: {
-  value: ArtifactStatus;
-  artifactName: string;
-  onChange: (status: ArtifactStatus) => void;
-}) {
-  const { t } = useLocale();
-  const labels: Record<ArtifactStatus, string> = {
-    missing: t("artifactAbsent"),
-    found: t("artifactFound"),
-    present: t("artifactPresent"),
-  };
-  return (
-    <div
-      className="mh-status-picks mh-status-picks-list"
-      role="group"
-      aria-label={`${t("artifactStatus")}: ${artifactName}`}
-    >
-      {STATUS_OPTIONS.map((option) => (
-        <button
-          key={option}
-          type="button"
-          className={`mh-status-pick status-${option}${value === option ? " active" : ""}`}
-          aria-pressed={value === option}
-          onClick={() => onChange(option)}
-        >
-          {labels[option]}
-        </button>
-      ))}
-    </div>
-  );
 }
 
 function StatusSelect({
@@ -135,16 +106,19 @@ function ArtifactCard({
   locale: Locale;
   onStatusChange: (status: ArtifactStatus) => void;
 }) {
+  const { t } = useLocale();
   const primary = locName(artifact, locale);
   const secondary = locale === "uk" ? artifact.nameEn : artifact.nameUk;
   const rarity = artifact.rarity as ArtifactRarity | undefined;
 
   return (
     <li
-      className={`mh-artifact mh-artifact-${view} mh-type-${artifact.anomalyType} status-${status}`}
+      className={`mh-artifact mh-art-card mh-artifact-${view} mh-type-${artifact.anomalyType} status-${status}`}
     >
-      {rarity ? (
-        <span className={`mh-rarity-tag mh-rarity-${rarity}`}>{rarity}</span>
+      {view === "grid" && rarity ? (
+        <span className={`mh-rarity-tag mh-rarity-${rarity}`}>
+          {t(RARITY_LABEL[rarity])}
+        </span>
       ) : null}
       <div className="mh-artifact-row">
         <span className="mh-artifact-icon-wrap" aria-hidden="true">
@@ -152,31 +126,43 @@ function ArtifactCard({
             className="mh-artifact-icon"
             src={artifactIconSrc(artifact.id)}
             alt=""
-            width={view === "grid" ? 160 : 88}
-            height={view === "grid" ? 160 : 88}
+            width={view === "grid" ? 160 : 128}
+            height={view === "grid" ? 160 : 128}
             loading="lazy"
           />
         </span>
         <span className="mh-artifact-body">
-          <span className="mh-artifact-names">
-            <span className="mh-artifact-title">{primary}</span>
-            <span className="mh-artifact-subtitle">{secondary}</span>
-          </span>
-          {view === "grid" ? (
-            <StatusSelect
-              value={status}
-              artifactName={primary}
-              onChange={onStatusChange}
-            />
-          ) : null}
+          {view === "list" ? (
+            <>
+              <span className="mh-artifact-heading">
+                <span className="mh-artifact-title">{primary}</span>
+                {rarity ? (
+                  <span className={`mh-rarity-tag mh-rarity-${rarity}`}>
+                    {t(RARITY_LABEL[rarity])}
+                  </span>
+                ) : null}
+              </span>
+              <span className="mh-artifact-subtitle">{secondary}</span>
+              <StatusSelect
+                value={status}
+                artifactName={primary}
+                onChange={onStatusChange}
+              />
+            </>
+          ) : (
+            <>
+              <span className="mh-artifact-names">
+                <span className="mh-artifact-title">{primary}</span>
+                <span className="mh-artifact-subtitle">{secondary}</span>
+              </span>
+              <StatusSelect
+                value={status}
+                artifactName={primary}
+                onChange={onStatusChange}
+              />
+            </>
+          )}
         </span>
-        {view === "list" ? (
-          <StatusPicker
-            value={status}
-            artifactName={primary}
-            onChange={onStatusChange}
-          />
-        ) : null}
       </div>
     </li>
   );
@@ -184,7 +170,7 @@ function ArtifactCard({
 
 export function MiracleListPage() {
   const { t, locale } = useLocale();
-  const { collectedArtifactIds, getArtifactStatus, setArtifactStatus } =
+  const { collectedArtifactIds, foundArtifactIds, getArtifactStatus, setArtifactStatus } =
     useProgress();
   const [params] = useSearchParams();
   const typeParam = params.get("type");
@@ -209,9 +195,13 @@ export function MiracleListPage() {
     }
   };
 
+  const trackedIds = useMemo(
+    () => trackedArtifactIds(collectedArtifactIds, foundArtifactIds),
+    [collectedArtifactIds, foundArtifactIds],
+  );
   const typeProgress = useMemo(
-    () => artifactTypeProgress(collectedArtifactIds),
-    [collectedArtifactIds],
+    () => artifactTypeProgress(trackedIds),
+    [trackedIds],
   );
 
   const filtered = useMemo(() => {
@@ -228,6 +218,21 @@ export function MiracleListPage() {
     });
   }, [anomalyType, status, q, getArtifactStatus]);
 
+  const statusCounts = useMemo(() => {
+    const counts = { missing: 0, found: 0, present: 0 };
+    const needle = q.trim().toLowerCase();
+    for (const a of ARTIFACTS) {
+      if (anomalyType !== "all" && a.anomalyType !== anomalyType) continue;
+      if (needle) {
+        const hay =
+          `${a.nameUk} ${a.nameEn} ${anomalyTypeLabel(a.anomalyType, "uk")} ${anomalyTypeLabel(a.anomalyType, "en")}`.toLowerCase();
+        if (!hay.includes(needle)) continue;
+      }
+      counts[getArtifactStatus(a.id)] += 1;
+    }
+    return counts;
+  }, [anomalyType, q, getArtifactStatus]);
+
   const grouped = useMemo(() => {
     return ANOMALY_TYPES.map((type) => ({
       type,
@@ -238,85 +243,49 @@ export function MiracleListPage() {
 
   return (
     <div className="page">
-      <header className="page-header mh-list-header">
-        <div>
-          <h1>{t("listTitle")}</h1>
-          <p>
-            {collectedArtifactIds.size} / {TOTAL_ARTIFACTS} · {t("listShowing")}{" "}
-            {filtered.length}
-          </p>
-        </div>
-        <div className="mh-view-toggle" role="group" aria-label={t("viewToggle")}>
-          <button
-            type="button"
-            className={view === "list" ? "active" : undefined}
-            aria-pressed={view === "list"}
-            title={t("viewList")}
-            onClick={() => setViewPersist("list")}
-          >
-            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M3 5h14v2H3V5zm0 4h14v2H3V9zm0 4h14v2H3v-2z"
-              />
-            </svg>
-            <span>{t("viewList")}</span>
-          </button>
-          <button
-            type="button"
-            className={view === "grid" ? "active" : undefined}
-            aria-pressed={view === "grid"}
-            title={t("viewGrid")}
-            onClick={() => setViewPersist("grid")}
-          >
-            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M3 3h6v6H3V3zm8 0h6v6h-6V3zM3 11h6v6H3v-6zm8 0h6v6h-6v-6z"
-              />
-            </svg>
-            <span>{t("viewGrid")}</span>
-          </button>
-        </div>
+      <header className="page-header mh-list-header mh-list-header-tools">
+        <ListToolbar
+          search={q}
+          onSearch={setQ}
+          searchPlaceholder={t("searchArtifact")}
+          view={view}
+          onView={setViewPersist}
+        />
       </header>
 
-      <div className="filters sticky-filters">
-        <label>
-          {t("search")}
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("searchArtifact")}
-          />
-        </label>
-        <label>
-          {t("anomalyType")}
-          <select
+      <div className="filter-card-stack">
+        <FilterCard className="filter-card-combined">
+          <AnomalyTypeFilter
             value={anomalyType}
-            onChange={(e) =>
-              setAnomalyType(e.target.value as typeof anomalyType)
-            }
-          >
-            <option value="all">{t("statusAll")}</option>
-            {ANOMALY_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {anomalyTypeLabel(type, locale)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {t("status")}
-          <select
+            onChange={setAnomalyType}
+            showTitle={false}
+          />
+          <div className="filter-stack-divider" role="separator" />
+          <FilterChoiceList
+            label={t("status")}
             value={status}
-            onChange={(e) => setStatus(e.target.value as StatusFilter)}
-          >
-            <option value="all">{t("statusAll")}</option>
-            <option value="missing">{t("artifactAbsent")}</option>
-            <option value="found">{t("artifactFound")}</option>
-            <option value="present">{t("artifactPresent")}</option>
-          </select>
-        </label>
+            variant="chips"
+            onChange={(next) => setStatus(next as StatusFilter)}
+            options={[
+              { value: "all", label: t("statusAll") },
+              {
+                value: "missing",
+                label: t("artifactAbsent"),
+                count: statusCounts.missing,
+              },
+              {
+                value: "found",
+                label: t("artifactFound"),
+                count: statusCounts.found,
+              },
+              {
+                value: "present",
+                label: t("artifactPresent"),
+                count: statusCounts.present,
+              },
+            ]}
+          />
+        </FilterCard>
       </div>
 
       {grouped.map(({ type, items, progress }) => (
@@ -328,19 +297,13 @@ export function MiracleListPage() {
           <div className="mh-type-header">
             <div className="mh-type-heading">
               <h2 id={`type-${type}`}>
-                <AnomalyTypeIcon type={type} size={44} onColorBg />
+                <AnomalyTypeIcon type={type} size={37} onColorBg />
                 <span>{anomalyTypeLabel(type, locale)}</span>
               </h2>
               <p className="mh-type-meta">
                 {progress.got}/{progress.total} {t("collectedOf")}
               </p>
             </div>
-            <Link
-              className="btn mh-map-btn"
-              to={`/miracle-hoarder?type=${type}`}
-            >
-              {t("seeMap")}
-            </Link>
           </div>
           {items.length === 0 ? (
             <p className="hint">{t("noResults")}</p>

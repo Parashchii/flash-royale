@@ -10,6 +10,8 @@ export default defineSchema({
     foundArtifactIds: v.optional(v.array(v.string())),
     collectedScannerIds: v.optional(v.array(v.string())),
     collectedArchArtifactIds: v.optional(v.array(v.string())),
+    collectedNonStopIds: v.optional(v.array(v.string())),
+    inaccessibleRegions: v.optional(v.array(v.string())),
     choices: v.object({
       spark: v.union(v.boolean(), v.null()),
       polissya: v.union(v.boolean(), v.null()),

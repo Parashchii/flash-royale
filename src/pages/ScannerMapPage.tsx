@@ -12,15 +12,25 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locField, locName, locPoi, locRegion } from "../i18n/localize";
+import { GuaranteeFab } from "../components/GuaranteeFab";
+import { MapLegend } from "../components/MapLegend";
+import { MapSidePanel } from "../components/MapSidePanel";
+import { MapDocsDrawer } from "../components/MapDocsDrawer";
+import { ScannerListPage } from "./ScannerListPage";
+import { ScannerOverviewPage } from "./ScannerOverviewPage";
+import {
+  ScannerGlyph,
+  TRACKER_MARKER_SIZE,
+  scannerMarkerHtml,
+} from "../components/TrackerMarkerGlyphs";
 
 type StatusFilter = "all" | "missing" | "collected";
 
 function markerHtml(got: boolean): string {
-  const tone = got ? "collected" : "missing";
-  const label = got ? "✓" : "◆";
-  return `<span class="sc-marker sc-marker-${tone}">${label}</span>`;
+  return scannerMarkerHtml(got);
 }
 
 export function ScannerMapPage() {
@@ -64,10 +74,9 @@ export function ScannerMapPage() {
       maxZoom: 7,
       maxBounds: MAP_BOUNDS.pad(0.05),
       zoomControl: false,
-      attributionControl: true,
+      attributionControl: false,
     });
 
-    L.control.zoom({ position: "bottomright" }).addTo(map);
     L.tileLayer(TILE_URL, {
       tileSize: 512,
       maxZoom: 7,
@@ -77,6 +86,7 @@ export function ScannerMapPage() {
       attribution: TILE_ATTR,
     }).addTo(map);
 
+    addRegionHoverLayer(map);
     const group = L.layerGroup().addTo(map);
     mapRef.current = map;
     layerRef.current = group;
@@ -103,8 +113,8 @@ export function ScannerMapPage() {
       const icon = L.divIcon({
         className: "sc-marker-wrap",
         html: markerHtml(got),
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
+        iconSize: [TRACKER_MARKER_SIZE, TRACKER_MARKER_SIZE],
+        iconAnchor: [TRACKER_MARKER_SIZE / 2, TRACKER_MARKER_SIZE / 2],
       });
       const marker = L.marker(worldToLatLng(s.worldX, s.worldY), { icon });
       marker.on("click", () => {
@@ -148,8 +158,57 @@ export function ScannerMapPage() {
 
   return (
     <div className="page map-page">
-      <section className="guarantee-card" aria-labelledby="scanner-map-title">
-        <h2 id="scanner-map-title">{t("scannerGuaranteeTitle")}</h2>
+      <div className="map-tools">
+        <MapSidePanel title={t("mapPanelTitle")}>
+          <div className="map-filters-card">
+            <div className="filters map-filters">
+              <label>
+                {t("region")}
+                <select
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                >
+                  <option value="all">{t("statusAll")}</option>
+                  {SCANNER_REGIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                {t("status")}
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as StatusFilter)}
+                >
+                  <option value="all">{t("statusAll")}</option>
+                  <option value="missing">{t("statusMissing")}</option>
+                  <option value="collected">{t("statusCollected")}</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <MapLegend>
+            <ul className="hint map-legend">
+            <li>
+              <span className="sc-marker sc-marker-missing legend-swatch">
+                <ScannerGlyph size={16} />
+              </span>
+              {t("legendMissing")}
+            </li>
+            <li>
+              <span className="sc-marker sc-marker-collected legend-swatch">
+                <ScannerGlyph size={16} />
+              </span>
+              {t("legendCollected")}
+            </li>
+            <li>{t("legendScannerSources")}</li>
+            </ul>
+          </MapLegend>
+        </MapSidePanel>
+        <GuaranteeFab title={t("scannerGuaranteeTitle")}>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -172,7 +231,13 @@ export function ScannerMapPage() {
             <span>{t("scannerGuarantee2")}</span>
           </li>
         </ul>
-      </section>
+      </GuaranteeFab>
+      </div>
+
+      <MapDocsDrawer
+        list={<ScannerListPage />}
+        overview={<ScannerOverviewPage />}
+      />
 
       <div className="map-stage">
         <div
@@ -226,7 +291,7 @@ export function ScannerMapPage() {
               </button>
               <Link
                 className="btn btn-ghost"
-                to={`/scanning-complete/list?q=${encodeURIComponent(locRegion(selected, locale))}`}
+                to={`/scanning-complete?view=list&q=${encodeURIComponent(locRegion(selected, locale))}`}
               >
                 {t("inList")}
               </Link>
@@ -234,43 +299,6 @@ export function ScannerMapPage() {
           </aside>
         )}
       </div>
-
-      <div className="map-filters-card">
-        <div className="filters map-filters">
-          <label>
-            {t("region")}
-            <select
-              value={region}
-              onChange={(e) => setRegion(e.target.value)}
-            >
-              <option value="all">{t("statusAll")}</option>
-              {SCANNER_REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t("status")}
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as StatusFilter)}
-            >
-              <option value="all">{t("statusAll")}</option>
-              <option value="missing">{t("statusMissing")}</option>
-              <option value="collected">{t("statusCollected")}</option>
-            </select>
-          </label>
-        </div>
-      </div>
-
-      <p className="hint map-legend">
-        <span className="sc-marker sc-marker-missing legend-swatch">◆</span>{" "}
-        {t("legendMissing")}{" "}
-        <span className="sc-marker sc-marker-collected legend-swatch">✓</span>{" "}
-        {t("legendCollected")} · {t("legendScannerSources")} · {t("legendTiles")}
-      </p>
     </div>
   );
 }

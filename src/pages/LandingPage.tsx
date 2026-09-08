@@ -7,11 +7,14 @@ import berryImg from "../assets/landing/landing-thunder-berry.jpg";
 import scannerImg from "../assets/landing/landing-scanner.jpg";
 import flowerImg from "../assets/landing/landing-weird-flower.jpg";
 import poppyImg from "../assets/landing/landing-poppy-field.jpg";
+import nonStopBg from "../assets/landing/landing-nonstop-bg.jpg";
+import nonStopCan from "../assets/landing/landing-nonstop-can.png";
 
 type TrackerCard = {
   id: Exclude<AchievementId, "show-all">;
   to: string;
   image: string;
+  productImage?: string;
 };
 
 const TRACKERS: TrackerCard[] = [
@@ -34,6 +37,12 @@ const TRACKERS: TrackerCard[] = [
     id: "curiouser-curiouser",
     to: "/curiouser-curiouser",
     image: flowerImg,
+  },
+  {
+    id: "non-stop",
+    to: "/non-stop",
+    image: nonStopBg,
+    productImage: nonStopCan,
   },
 ];
 
@@ -71,6 +80,15 @@ export function LandingPage() {
               to={card.to}
               style={{ backgroundImage: `url(${card.image})` }}
             >
+              {card.productImage ? (
+                <img
+                  className="landing-tile-product"
+                  src={card.productImage}
+                  alt=""
+                  width={160}
+                  height={160}
+                />
+              ) : null}
               <span className="landing-tile-label">
                 {locName(ACHIEVEMENTS[card.id], locale)}
               </span>

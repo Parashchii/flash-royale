@@ -3,11 +3,15 @@ import gravIcon from "../assets/anomaly-icons/gravitational.png";
 import thermalIcon from "../assets/anomaly-icons/thermal.png";
 
 export const ANOMALY_TYPE_COLORS: Record<AnomalyType, string> = {
-  chemical: "#2fbf4a",
-  gravitational: "#7a52f0",
-  thermal: "#f06a14",
-  electro: "#12b7e6",
+  chemical: "#00d636",
+  gravitational: "#6b28ff",
+  thermal: "#ff4d00",
+  electro: "#00b8f5",
 };
+
+/** Map marker diameter; ~85% of the previous 36px. */
+export const ANOMALY_MARKER_SIZE = 31;
+const MARKER_GLYPH_SIZE = 22;
 
 const GLYPH_ON_COLOR = "#fff8ef";
 const GLYPH_ON_MUTED = "#e8ece8";
@@ -44,12 +48,18 @@ function glyphHtml(type: AnomalyType, size: number, fill: string) {
 /** HTML for Leaflet divIcon markers. */
 export function anomalyTypeMarkerHtml(
   type: AnomalyType,
-  opts: { done?: boolean; approx?: boolean } = {},
+  opts: { done?: boolean; approx?: boolean; routeIndex?: number } = {},
 ): string {
   const done = opts.done ? " mh-marker-done" : " mh-marker-worth";
   const approx = opts.approx ? " mh-marker-approx" : "";
+  const onRoute =
+    opts.routeIndex != null ? " mh-marker-on-route" : "";
   const fill = opts.done ? GLYPH_ON_MUTED : GLYPH_ON_COLOR;
-  return `<span class="mh-marker mh-marker-type mh-marker-${type}${done}${approx}">${glyphHtml(type, 26, fill)}</span>`;
+  const badge =
+    opts.routeIndex != null
+      ? `<span class="mh-route-index">${opts.routeIndex}</span>`
+      : "";
+  return `<span class="mh-marker mh-marker-type mh-marker-${type}${done}${approx}${onRoute}">${glyphHtml(type, MARKER_GLYPH_SIZE, fill)}${badge}</span>`;
 }
 
 export function AnomalyTypeIcon({
@@ -78,7 +88,6 @@ export function AnomalyTypeIcon({
       className={`mh-type-icon mh-type-icon-${type}${onColorBg ? " mh-type-icon-badge" : ""}${className ? ` ${className}` : ""}`}
       style={{
         color: glyph,
-        backgroundColor: onColorBg ? ANOMALY_TYPE_COLORS[type] : undefined,
         width: size,
         height: size,
       }}

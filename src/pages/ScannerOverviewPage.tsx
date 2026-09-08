@@ -10,7 +10,7 @@ export function ScannerOverviewPage() {
     : 0;
 
   return (
-    <div className="page home">
+    <div className="page overview-page">
       <header className="hero-home">
         <p className="lede">
           Трекер 10 стаціонарних сканерів для досягнення Scanning Complete
@@ -81,22 +81,6 @@ export function ScannerOverviewPage() {
             та Steam-гайдів.
           </li>
         </ol>
-      </section>
-
-      <section className="overview-section" aria-labelledby="pda-title">
-        <h2 id="pda-title">Перевірка</h2>
-        <p className="overview-lede">
-          Відмічайте зібране в списку або на мапі — прогрес зберігається в
-          цьому браузері (або в хмарі, якщо увійти).
-        </p>
-        <div className="choice-actions">
-          <Link className="btn" to="/scanning-complete/list">
-            Відкрити список
-          </Link>
-          <Link className="btn btn-ghost" to="/scanning-complete">
-            Відкрити мапу
-          </Link>
-        </div>
       </section>
     </div>
   );

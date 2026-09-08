@@ -2,9 +2,11 @@ import { Link, NavLink, Outlet, useLocation, useParams } from "react-router-dom"
 import {
   TOTAL_ARCH_ARTIFACTS,
   TOTAL_ARTIFACTS,
+  TOTAL_NON_STOP,
   TOTAL_SCANNERS,
   TOTAL_UNIQUE,
   UNIQUE_BLUEPRINT_KEYS,
+  trackedArtifactIds,
 } from "../data/catalog";
 import {
   ACHIEVEMENT_LIST,
@@ -21,36 +23,31 @@ import { LangSwitcher } from "./LangSwitcher";
 import { ProfileMenu } from "./ProfileMenu";
 import radiationLogo from "../assets/radiation-logo.png";
 
-const TRACKER_NAV_ORDER: AchievementId[] = ACHIEVEMENT_LIST.filter(
-  (a) => a.id !== "show-all",
-).map((a) => a.id);
+const ACH_TAB_ORDER: AchievementId[] = [
+  "show-all",
+  ...ACHIEVEMENT_LIST.filter((a) => a.id !== "show-all").map((a) => a.id),
+];
 
-function useSectionLinks(achievementId: AchievementId) {
-  const { t } = useLocale();
-  if (achievementId === "show-all") {
-    return [];
-  }
-  return [
-    { to: `/${achievementId}`, label: t("navMap"), end: true },
-    { to: `/${achievementId}/list`, label: t("navList") },
-    { to: `/${achievementId}/overview`, label: t("navOverview") },
-    { to: "/data", label: t("navData") },
-  ];
+function isMapPath(pathname: string): boolean {
+  if (pathname === "/" || pathname === "/data") return false;
+  const parts = pathname.split("/").filter(Boolean);
+  return parts.length === 1 && isAchievementId(parts[0]);
 }
 
 function progressFor(
   achievementId: AchievementId,
   collectedKeys: Set<string>,
-  collectedArtifactIds: Set<string>,
+  artifactIds: Set<string>,
   collectedScannerIds: Set<string>,
   collectedArchArtifactIds: Set<string>,
+  collectedNonStopIds: Set<string>,
 ): { done: number; total: number } {
   const flashDone = UNIQUE_BLUEPRINT_KEYS.filter((k) =>
     collectedKeys.has(k),
   ).length;
 
   if (achievementId === "miracle-hoarder") {
-    return { done: collectedArtifactIds.size, total: TOTAL_ARTIFACTS };
+    return { done: artifactIds.size, total: TOTAL_ARTIFACTS };
   }
   if (achievementId === "scanning-complete") {
     return { done: collectedScannerIds.size, total: TOTAL_SCANNERS };
@@ -58,18 +55,23 @@ function progressFor(
   if (achievementId === "curiouser-curiouser") {
     return { done: collectedArchArtifactIds.size, total: TOTAL_ARCH_ARTIFACTS };
   }
+  if (achievementId === "non-stop") {
+    return { done: collectedNonStopIds.size, total: TOTAL_NON_STOP };
+  }
   if (achievementId === "show-all") {
     return {
       done:
         flashDone +
-        collectedArtifactIds.size +
+        artifactIds.size +
         collectedScannerIds.size +
-        collectedArchArtifactIds.size,
+        collectedArchArtifactIds.size +
+        collectedNonStopIds.size,
       total:
         TOTAL_UNIQUE +
         TOTAL_ARTIFACTS +
         TOTAL_SCANNERS +
-        TOTAL_ARCH_ARTIFACTS,
+        TOTAL_ARCH_ARTIFACTS +
+        TOTAL_NON_STOP,
     };
   }
   return { done: flashDone, total: TOTAL_UNIQUE };
@@ -79,8 +81,10 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
   const {
     collectedKeys,
     collectedArtifactIds,
+    foundArtifactIds,
     collectedScannerIds,
     collectedArchArtifactIds,
+    collectedNonStopIds,
   } = useProgress();
   const location = useLocation();
   const params = useParams();
@@ -88,111 +92,82 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
   const { t, locale } = useLocale();
 
   const isHome = location.pathname === "/";
+  const isMapPage = isMapPath(location.pathname);
 
   const achievementId: AchievementId = achCtx?.achievementId
     ?? (isAchievementId(params.achievementId) ? params.achievementId : "flash-royale");
 
-  const sectionLinks = useSectionLinks(achievementId);
   const showProgress = !isHome;
-
-  const { done, total } = progressFor(
-    achievementId,
-    collectedKeys,
-    collectedArtifactIds,
-    collectedScannerIds,
-    collectedArchArtifactIds,
-  );
+  const artifactIds = trackedArtifactIds(collectedArtifactIds, foundArtifactIds);
 
   return (
     <>
-      <div className="app-chrome">
-        <div className="app-chrome-inner">
-          <header className="topbar">
-            <div className="topbar-start">
-              <div className="brand-block">
-                <Link to="/" className="brand-home-link" aria-label={t("navHome")}>
-                  <img
-                    className="brand-logo"
-                    src={radiationLogo}
-                    alt=""
-                    width={36}
-                    height={36}
-                  />
-                </Link>
-                <Link to="/" className="brand-name" aria-label={t("brandTitle")}>
-                  <span className="brand-stalker">stalker</span>
-                  <span className="brand-solutions"> solutions</span>
-                </Link>
-              </div>
-              <NavLink
-                to="/show-all"
-                className={({ isActive }) =>
-                  isActive || location.pathname.startsWith("/show-all/")
-                    ? "ach-nav-link active"
-                    : "ach-nav-link"
-                }
-              >
-                {locName(ACHIEVEMENTS["show-all"], locale)}
-              </NavLink>
+      <div className={isMapPage ? "app-chrome app-chrome-overlay" : "app-chrome"}>
+        <header className="topbar">
+          <div className="topbar-inner">
+            <div className="brand-block">
+              <Link to="/" className="brand-home-link" aria-label={t("navHome")}>
+                <span className="brand-logo-glow" aria-hidden="true" />
+                <img
+                  className="brand-logo"
+                  src={radiationLogo}
+                  alt=""
+                  width={28}
+                  height={28}
+                />
+              </Link>
+              <Link to="/" className="brand-name" aria-label={t("brandTitle")}>
+                <span className="brand-stalker">stalker</span>
+                <span className="brand-solutions">solutions</span>
+              </Link>
             </div>
 
-            <nav className="ach-nav" aria-label={t("achNavAria")}>
-              {TRACKER_NAV_ORDER.map((id) => {
-                const meta = ACHIEVEMENTS[id];
-                const active =
-                  location.pathname === `/${id}` ||
-                  location.pathname.startsWith(`/${id}/`);
-                return (
-                  <NavLink
-                    key={id}
-                    to={`/${id}`}
-                    className={active ? "ach-nav-link active" : "ach-nav-link"}
-                  >
-                    {locName(meta, locale)}
-                  </NavLink>
-                );
-              })}
-            </nav>
-
             <div className="auth-block">
-              {showProgress ? (
-                <p className="progress-pill">
-                  {Math.min(done, total)} / {total}
-                </p>
-              ) : null}
               <LangSwitcher />
               {authConfigured ? <AuthControls /> : <ProfileMenu />}
             </div>
-          </header>
-        </div>
-
-        {!isHome && sectionLinks.length > 0 ? (
-          <div className="section-nav-bar">
-            <nav className="nav" aria-label={t("navAria")}>
-              <div className="nav-track">
-                {sectionLinks.map((l) => (
-                  <NavLink
-                    key={l.to}
-                    to={l.to}
-                    end={l.end}
-                    className={({ isActive }) => {
-                      const onMap =
-                        l.end &&
-                        (location.pathname === `/${achievementId}` ||
-                          location.pathname === `/${achievementId}/`);
-                      return isActive || onMap ? "nav-link active" : "nav-link";
-                    }}
-                  >
-                    {l.label}
-                  </NavLink>
-                ))}
-              </div>
-            </nav>
           </div>
+        </header>
+
+        {!isHome ? (
+          <nav className="ach-tabs" aria-label={t("achNavAria")}>
+            {ACH_TAB_ORDER.map((id) => {
+              const meta = ACHIEVEMENTS[id];
+              const active =
+                location.pathname === `/${id}` ||
+                location.pathname.startsWith(`/${id}/`);
+              const tabProgress = progressFor(
+                id,
+                collectedKeys,
+                artifactIds,
+                collectedScannerIds,
+                collectedArchArtifactIds,
+                collectedNonStopIds,
+              );
+              return (
+                <NavLink
+                  key={id}
+                  to={`/${id}`}
+                  className={active ? "ach-tab active" : "ach-tab"}
+                >
+                <span className="ach-tab-label">
+                  {id === "show-all" ? t("achAllShort") : locName(meta, locale)}
+                  {showProgress
+                    ? `  ${Math.min(tabProgress.done, tabProgress.total)} / ${tabProgress.total}`
+                    : null}
+                </span>
+                </NavLink>
+              );
+            })}
+          </nav>
         ) : null}
       </div>
 
-      <div className={isHome ? "app app-home" : "app"}>
+      <div
+        className={
+          isHome ? "app app-home" : isMapPage ? "app app-map" : "app app-tracker"
+        }
+      >
         <main className="main">{children ?? <Outlet />}</main>
       </div>
     </>

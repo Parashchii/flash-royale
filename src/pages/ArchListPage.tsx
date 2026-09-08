@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   ARCH_ARTIFACTS,
   ARCH_REGIONS,
@@ -10,6 +10,8 @@ import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
 import { locAnomaly, locName, locRegion } from "../i18n/localize";
 import type { Locale } from "../i18n/messages";
+import { FilterCard, FilterChoiceList } from "../components/FilterCard";
+import { ListToolbar } from "../components/ListToolbar";
 
 type StatusFilter = "all" | "missing" | "collected";
 type ViewMode = "list" | "grid";
@@ -104,84 +106,50 @@ export function ArchListPage() {
   return (
     <div className="page">
       <header className="page-header mh-list-header">
-        <div>
-          <h1>{t("listTitle")}</h1>
-          <p>
-            {collectedArchArtifactIds.size} / {TOTAL_ARCH_ARTIFACTS} ·{" "}
-            {t("listShowing")} {filtered.length}
-          </p>
-        </div>
-        <div className="mh-view-toggle" role="group" aria-label={t("viewToggle")}>
-          <button
-            type="button"
-            className={view === "list" ? "active" : undefined}
-            aria-pressed={view === "list"}
-            title={t("viewList")}
-            onClick={() => setView("list")}
-          >
-            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M3 5h14v2H3V5zm0 4h14v2H3V9zm0 4h14v2H3v-2z"
-              />
-            </svg>
-            <span>{t("viewList")}</span>
-          </button>
-          <button
-            type="button"
-            className={view === "grid" ? "active" : undefined}
-            aria-pressed={view === "grid"}
-            title={t("viewGrid")}
-            onClick={() => setView("grid")}
-          >
-            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-              <path
-                fill="currentColor"
-                d="M3 3h6v6H3V3zm8 0h6v6h-6V3zM3 11h6v6H3v-6zm8 0h6v6h-6v-6z"
-              />
-            </svg>
-            <span>{t("viewGrid")}</span>
-          </button>
-        </div>
+        <p>
+          {collectedArchArtifactIds.size} / {TOTAL_ARCH_ARTIFACTS} ·{" "}
+          {t("listShowing")} {filtered.length}
+        </p>
+        <ListToolbar
+          search={q}
+          onSearch={setQ}
+          searchPlaceholder={t("searchGeneric")}
+          view={view}
+          onView={setView}
+        />
       </header>
 
-      <div className="filters sticky-filters">
-        <label>
-          {t("search")}
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("searchGeneric")}
-          />
-        </label>
-        <label>
-          {t("region")}
-          <select
+      <div className="filter-card-stack">
+        <FilterCard title={t("region")}>
+          <FilterChoiceList
+            label={t("region")}
             value={region}
-            onChange={(e) => setRegion(e.target.value)}
-          >
-            <option value="all">{t("statusAll")}</option>
-            {ARCH_REGIONS.map((r) => {
-              const sample = ARCH_ARTIFACTS.find((a) => a.region === r);
-              return (
-                <option key={r} value={r}>
-                  {sample ? locRegion(sample, locale) : r}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-        <label>
-          {t("status")}
-          <select
+            onChange={setRegion}
+            options={[
+              { value: "all", label: t("statusAll") },
+              ...ARCH_REGIONS.map((r) => {
+                const sample = ARCH_ARTIFACTS.find((a) => a.region === r);
+                return {
+                  value: r,
+                  label: sample ? locRegion(sample, locale) : r,
+                };
+              }),
+            ]}
+          />
+        </FilterCard>
+        <FilterCard title={t("status")}>
+          <FilterChoiceList
+            label={t("status")}
             value={status}
-            onChange={(e) => setStatus(e.target.value as StatusFilter)}
-          >
-            <option value="all">{t("statusAll")}</option>
-            <option value="missing">{t("statusMissing")}</option>
-            <option value="collected">{t("statusCollected")}</option>
-          </select>
-        </label>
+            variant="chips"
+            onChange={(next) => setStatus(next as StatusFilter)}
+            options={[
+              { value: "all", label: t("statusAll") },
+              { value: "missing", label: t("statusMissing") },
+              { value: "collected", label: t("statusCollected") },
+            ]}
+          />
+        </FilterCard>
       </div>
 
       {grouped.map(({ region: reg, regionLabel, items, got, total }) => (
@@ -197,9 +165,6 @@ export function ArchListPage() {
                 {got}/{total} {t("collectedOf")}
               </p>
             </div>
-            <Link className="btn mh-map-btn" to="/curiouser-curiouser">
-              {t("seeMap")}
-            </Link>
           </div>
           {items.length === 0 ? (
             <p className="hint">{t("noResults")}</p>

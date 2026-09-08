@@ -6,9 +6,11 @@ import {
   ANOMALY_FIELDS,
   ARCH_ARTIFACTS,
   FLASHDRIVES,
+  NON_STOP_CANS,
   SCANNERS,
   UNIQUE_BLUEPRINT_KEYS,
   missingArtifactTypes,
+  trackedArtifactIds,
 } from "../data/catalog";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { useProgress } from "../hooks/useProgress";
@@ -19,15 +21,35 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locName } from "../i18n/localize";
-import { anomalyTypeMarkerHtml } from "../components/AnomalyTypeIcon";
+import {
+  ANOMALY_MARKER_SIZE,
+  AnomalyTypeIcon,
+  anomalyTypeMarkerHtml,
+} from "../components/AnomalyTypeIcon";
+import { GuaranteeFab } from "../components/GuaranteeFab";
+import { MapLegend } from "../components/MapLegend";
+import { MapSidePanel } from "../components/MapSidePanel";
+import {
+  FlashGlyph,
+  NonStopGlyph,
+  ScannerGlyph,
+  StarGlyph,
+  TRACKER_MARKER_SIZE,
+  archMarkerHtml,
+  flashMarkerHtml,
+  nonStopMarkerHtml,
+  scannerMarkerHtml,
+} from "../components/TrackerMarkerGlyphs";
 
 type LayerId =
   | "flash-royale"
   | "miracle-hoarder"
   | "scanning-complete"
-  | "curiouser-curiouser";
+  | "curiouser-curiouser"
+  | "non-stop";
 
 type UnifiedMarker = {
   key: string;
@@ -48,6 +70,7 @@ function wrapClass(layer: LayerId): string {
   if (layer === "flash-royale") return "fr-marker-wrap";
   if (layer === "miracle-hoarder") return "mh-marker-wrap";
   if (layer === "scanning-complete") return "sc-marker-wrap";
+  if (layer === "non-stop") return "ns-marker-wrap";
   return "aa-marker-wrap";
 }
 
@@ -56,8 +79,10 @@ export function AllMapPage() {
   const {
     collectedKeys,
     collectedArtifactIds,
+    foundArtifactIds,
     collectedScannerIds,
     collectedArchArtifactIds,
+    collectedNonStopIds,
   } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -67,6 +92,7 @@ export function AllMapPage() {
     "miracle-hoarder",
     "scanning-complete",
     "curiouser-curiouser",
+    "non-stop",
   ] as const;
 
   const [layers, setLayers] = useState<Record<LayerId, boolean>>({
@@ -74,6 +100,7 @@ export function AllMapPage() {
     "miracle-hoarder": true,
     "scanning-complete": true,
     "curiouser-curiouser": true,
+    "non-stop": true,
   });
   const [selectedKey, setSelectedKey] = useState<string | null>(focusId);
 
@@ -81,9 +108,13 @@ export function AllMapPage() {
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
 
+  const trackedIds = useMemo(
+    () => trackedArtifactIds(collectedArtifactIds, foundArtifactIds),
+    [collectedArtifactIds, foundArtifactIds],
+  );
   const missingTypes = useMemo(
-    () => missingArtifactTypes(collectedArtifactIds),
-    [collectedArtifactIds],
+    () => missingArtifactTypes(trackedIds),
+    [trackedIds],
   );
 
   const markers = useMemo((): UnifiedMarker[] => {
@@ -110,7 +141,7 @@ export function AllMapPage() {
         detail: f.accessUk,
         done,
         mapHref: `/flash-royale?id=${f.id}`,
-        html: `<span class="fr-marker fr-marker-${tone}">${done ? "✓" : "◆"}</span>`,
+        html: flashMarkerHtml(tone),
       });
     }
 
@@ -146,7 +177,7 @@ export function AllMapPage() {
         detail: s.accessUk,
         done,
         mapHref: `/scanning-complete?id=${s.id}`,
-        html: `<span class="sc-marker sc-marker-${done ? "collected" : "missing"}">${done ? "✓" : "◆"}</span>`,
+        html: scannerMarkerHtml(done),
       });
     }
 
@@ -164,7 +195,25 @@ export function AllMapPage() {
         detail: a.accessUk,
         done,
         mapHref: `/curiouser-curiouser?id=${a.id}`,
-        html: `<span class="aa-marker aa-marker-${done ? "collected" : "missing"}">${done ? "✓" : "◆"}</span>`,
+        html: archMarkerHtml(done),
+      });
+    }
+
+    for (const can of NON_STOP_CANS) {
+      const done = collectedNonStopIds.has(can.id);
+      out.push({
+        key: `ns-${can.id}`,
+        layer: "non-stop",
+        worldX: can.worldX,
+        worldY: can.worldY,
+        titleUk: can.nameUk,
+        titleEn: can.nameEn,
+        metaUk: `${can.region} · non-stop`,
+        metaEn: `${can.regionEn || can.region} · non-stop`,
+        detail: can.accessUk,
+        done,
+        mapHref: `/non-stop?id=${can.id}`,
+        html: nonStopMarkerHtml(done),
       });
     }
 
@@ -173,6 +222,7 @@ export function AllMapPage() {
     collectedKeys,
     collectedScannerIds,
     collectedArchArtifactIds,
+    collectedNonStopIds,
     missingTypes,
   ]);
 
@@ -197,10 +247,9 @@ export function AllMapPage() {
       maxZoom: 7,
       maxBounds: MAP_BOUNDS.pad(0.05),
       zoomControl: false,
-      attributionControl: true,
+      attributionControl: false,
     });
 
-    L.control.zoom({ position: "bottomright" }).addTo(map);
     L.tileLayer(TILE_URL, {
       tileSize: 512,
       maxZoom: 7,
@@ -210,6 +259,7 @@ export function AllMapPage() {
       attribution: TILE_ATTR,
     }).addTo(map);
 
+    addRegionHoverLayer(map);
     const group = L.layerGroup().addTo(map);
     mapRef.current = map;
     layerRef.current = group;
@@ -230,7 +280,8 @@ export function AllMapPage() {
     group.clearLayers();
 
     for (const m of filtered) {
-      const size = m.layer === "miracle-hoarder" ? 36 : 28;
+      const size =
+        m.layer === "miracle-hoarder" ? ANOMALY_MARKER_SIZE : TRACKER_MARKER_SIZE;
       const icon = L.divIcon({
         className: wrapClass(m.layer),
         html: m.html,
@@ -283,8 +334,59 @@ export function AllMapPage() {
 
   return (
     <div className="page map-page">
-      <section className="guarantee-card" aria-labelledby="all-map-title">
-        <h2 id="all-map-title">{t("allMapTitle")}</h2>
+      <div className="map-tools">
+        <MapSidePanel title={t("mapPanelTitle")}>
+          <div className="map-filters-card">
+            <div className="filters map-filters all-map-layers" role="group" aria-label={t("layers")}>
+              {layerIds.map((id) => (
+                <label key={id} className="check-label">
+                  <input
+                    type="checkbox"
+                    checked={layers[id]}
+                    onChange={() => toggleLayer(id)}
+                  />
+                  {locName(ACHIEVEMENTS[id], locale)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <MapLegend>
+            <ul className="hint map-legend">
+            <li>
+              <span className="fr-marker fr-marker-missing legend-swatch">
+                <FlashGlyph size={16} />
+              </span>
+              {t("legendFlash")} ({flashDone}/{UNIQUE_BLUEPRINT_KEYS.length})
+            </li>
+            <li>
+              <span className="mh-marker mh-marker-worth legend-swatch">
+                <AnomalyTypeIcon type="chemical" size={16} color="#fff8ef" />
+              </span>
+              {t("legendAnomalies")}
+            </li>
+            <li>
+              <span className="sc-marker sc-marker-missing legend-swatch">
+                <ScannerGlyph size={16} />
+              </span>
+              {t("legendScanners")} ({collectedScannerIds.size}/{SCANNERS.length})
+            </li>
+            <li>
+              <span className="aa-marker aa-marker-missing legend-swatch">
+                <StarGlyph size={16} />
+              </span>
+              {t("legendArch")} ({collectedArchArtifactIds.size}/{ARCH_ARTIFACTS.length})
+            </li>
+            <li>
+              <span className="ns-marker ns-marker-missing legend-swatch">
+                <NonStopGlyph height={16} />
+              </span>
+              {t("legendNonStop")} ({collectedNonStopIds.size}/{NON_STOP_CANS.length})
+            </li>
+            </ul>
+          </MapLegend>
+        </MapSidePanel>
+        <GuaranteeFab title={t("allMapTitle")}>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -315,11 +417,16 @@ export function AllMapPage() {
               >
                 {t("allMapLinkArch")}
               </Link>
+              ,{" "}
+              <Link className="layer-link layer-link-ns" to="/non-stop">
+                {t("allMapLinkNonStop")}
+              </Link>
               {t("allMapIntroAfter")}
             </span>
           </li>
         </ul>
-      </section>
+      </GuaranteeFab>
+      </div>
 
       <div className="map-stage">
         <div
@@ -359,32 +466,6 @@ export function AllMapPage() {
           </aside>
         )}
       </div>
-
-      <div className="map-filters-card">
-        <div className="filters map-filters all-map-layers" role="group" aria-label={t("layers")}>
-          {layerIds.map((id) => (
-            <label key={id} className="check-label">
-              <input
-                type="checkbox"
-                checked={layers[id]}
-                onChange={() => toggleLayer(id)}
-              />
-              {locName(ACHIEVEMENTS[id], locale)}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <p className="hint map-legend">
-        <span className="fr-marker fr-marker-missing legend-swatch">◆</span>{" "}
-        {t("legendFlash")} ({flashDone}/{UNIQUE_BLUEPRINT_KEYS.length}){" "}
-        <span className="mh-marker mh-marker-worth legend-swatch">◆</span>{" "}
-        {t("legendAnomalies")}{" "}
-        <span className="sc-marker sc-marker-missing legend-swatch">◆</span>{" "}
-        {t("legendScanners")} ({collectedScannerIds.size}/{SCANNERS.length}){" "}
-        <span className="aa-marker aa-marker-missing legend-swatch">◆</span>{" "}
-        {t("legendArch")} ({collectedArchArtifactIds.size}/{ARCH_ARTIFACTS.length})
-      </p>
     </div>
   );
 }

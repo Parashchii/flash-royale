@@ -55,8 +55,8 @@ export function swapAchievementPath(
   const parts = pathname.split("/").filter(Boolean);
   if (parts.length === 0) return `/${nextId}`;
   if (isAchievementId(parts[0])) {
-    // Show-all is map-only — drop list/overview suffixes.
-    if (nextId === "show-all") return `/${nextId}`;
+    // Map-only sections — drop list/overview suffixes.
+    if (nextId === "show-all" || nextId === "non-stop") return `/${nextId}`;
     parts[0] = nextId;
     return `/${parts.join("/")}`;
   }

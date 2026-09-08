@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="48" preserveAspectRatio="none" viewBox="0 0 1920 48">
+  <defs>
+    <linearGradient id="iron" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0d0d0d"/>
+      <stop offset="18%" stop-color="#121212"/>
+      <stop offset="41%" stop-color="#0b0b0b"/>
+      <stop offset="63%" stop-color="#151515"/>
+      <stop offset="82%" stop-color="#0c0c0c"/>
+      <stop offset="100%" stop-color="#101010"/>
+    </linearGradient>
+    <linearGradient id="vert" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+    </linearGradient>
+    <filter id="soft" x="-5%" y="-40%" width="110%" height="180%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.0018 0.09" numOctaves="2" seed="11" stitchTiles="noStitch"/>
+      <feColorMatrix values="0 0 0 0 0.03  0 0 0 0 0.03  0 0 0 0 0.03  0 0 0 0.55 0"/>
+    </filter>
+  </defs>
+  <rect width="1920" height="48" fill="url(#iron)"/>
+  <rect width="1920" height="48" filter="url(#soft)" opacity="0.7"/>
+  <rect width="1920" height="48" fill="url(#vert)"/>
+  <g fill="#000" fill-opacity="0.28">
+    <ellipse cx="96" cy="40" rx="70" ry="10"/>
+    <ellipse cx="510" cy="6" rx="90" ry="8"/>
+    <ellipse cx="980" cy="44" rx="120" ry="12"/>
+    <ellipse cx="1490" cy="8" rx="80" ry="9"/>
+    <ellipse cx="1788" cy="36" rx="95" ry="11"/>
+  </g>
+  <g fill="none" stroke="#000" stroke-opacity="0.5" stroke-linecap="round">
+    <path d="M14 11.2c48 1.4 91-2.1 147 0.6" stroke-width="0.8"/>
+    <path d="M188 33.8 361 29.4 402 31.1" stroke-width="0.55"/>
+    <path d="M428 8.2 612 13.6 701 9.4" stroke-width="0.7"/>
+    <path d="M640 37.5 798 41.8" stroke-width="0.45"/>
+    <path d="M844 7.1 903 18.4 968 8.8" stroke-width="0.5"/>
+    <path d="M1022 30.6 1240 26.2 1318 34.4" stroke-width="0.65"/>
+    <path d="M1388 9.6 1520 14.2 1633 8.1" stroke-width="0.7"/>
+    <path d="M1670 39.2 1848 35.4 1910 38" stroke-width="0.5"/>
+    <path d="M273 13.5 281 35.2" stroke-width="0.4"/>
+    <path d="M1188 10.2 1196 28.8" stroke-width="0.35"/>
+  </g>
+  <g fill="none" stroke="#fff" stroke-opacity="0.07" stroke-linecap="round">
+    <path d="M36 5.4 171 7.1" stroke-width="0.7"/>
+    <path d="M454 5.2 638 8.4" stroke-width="0.55"/>
+    <path d="M1088 5.6 1264 7.8" stroke-width="0.6"/>
+    <path d="M1544 5.8 1702 8.2" stroke-width="0.5"/>
+  </g>
+</svg>

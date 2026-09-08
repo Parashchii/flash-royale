@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   TOTAL_ARTIFACTS,
   artifactTypeProgress,
+  trackedArtifactIds,
 } from "../data/catalog";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { ANOMALY_TYPES } from "../data/types";
@@ -12,20 +13,24 @@ import { anomalyTypeLabel, locName } from "../i18n/localize";
 import { AnomalyTypeIcon } from "../components/AnomalyTypeIcon";
 
 export function MiracleOverviewPage() {
-  const { t, locale } = useLocale();
-  const { collectedArtifactIds } = useProgress();
-  const done = collectedArtifactIds.size;
+  const { locale } = useLocale();
+  const { collectedArtifactIds, foundArtifactIds } = useProgress();
+  const trackedIds = useMemo(
+    () => trackedArtifactIds(collectedArtifactIds, foundArtifactIds),
+    [collectedArtifactIds, foundArtifactIds],
+  );
+  const done = trackedIds.size;
   const pct = TOTAL_ARTIFACTS
     ? Math.round((done / TOTAL_ARTIFACTS) * 100)
     : 0;
   const typeProgress = useMemo(
-    () => artifactTypeProgress(collectedArtifactIds),
-    [collectedArtifactIds],
+    () => artifactTypeProgress(trackedIds),
+    [trackedIds],
   );
   const achName = locName(ACHIEVEMENTS["miracle-hoarder"], locale);
 
   return (
-    <div className="page home">
+    <div className="page overview-page">
       <header className="hero-home">
         <p className="lede">
           {locale === "uk"
@@ -55,7 +60,7 @@ export function MiracleOverviewPage() {
               <li key={type} className={complete ? "done" : "open"}>
                 <div>
                   <strong className="mh-type-status-title">
-                    <AnomalyTypeIcon type={type} size={28} onColorBg />
+                    <AnomalyTypeIcon type={type} size={24} onColorBg />
                     {anomalyTypeLabel(type, locale)}
                   </strong>
                   <span>
@@ -69,12 +74,6 @@ export function MiracleOverviewPage() {
                         : " · still farming"}
                   </span>
                 </div>
-                <Link
-                  className="btn btn-ghost"
-                  to={`/miracle-hoarder?type=${type}`}
-                >
-                  {t("map")}
-                </Link>
               </li>
             );
           })}
@@ -99,25 +98,9 @@ export function MiracleOverviewPage() {
           <li>
             На мапі підсвічені поля аномалій, поки для їхнього типу ще є
             незабрані артефакти в{" "}
-            <Link to="/miracle-hoarder/list">списку</Link>.
+            <Link to="/miracle-hoarder?view=list">списку</Link>.
           </li>
         </ol>
-      </section>
-
-      <section className="overview-section" aria-labelledby="pda-title">
-        <h2 id="pda-title">Перевірка</h2>
-        <p className="overview-lede">
-          Відмічайте зібране в списку — прогрес зберігається в цьому браузері.
-          Мапа показує поля аномалій для фарму артефактів (координати з teleport-гайду).
-        </p>
-        <div className="choice-actions">
-          <Link className="btn" to="/miracle-hoarder/list">
-            Відкрити список
-          </Link>
-          <Link className="btn btn-ghost" to="/miracle-hoarder">
-            Мапа аномалій
-          </Link>
-        </div>
       </section>
     </div>
   );

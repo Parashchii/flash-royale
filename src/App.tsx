@@ -3,21 +3,15 @@ import { AppShell } from "./components/AppShell";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { ProgressProvider } from "./hooks/useProgress";
 import { AchievementProvider } from "./hooks/useAchievement";
-import { HomePage } from "./pages/HomePage";
+import { MapDrawerProvider } from "./hooks/useMapDrawer";
 import { LandingPage } from "./pages/LandingPage";
-import { FlashdrivesPage } from "./pages/FlashdrivesPage";
 import { DataPage } from "./pages/DataPage";
 import { MapPage } from "./pages/MapPage";
 import { MiracleMapPage } from "./pages/MiracleMapPage";
-import { MiracleListPage } from "./pages/MiracleListPage";
-import { MiracleOverviewPage } from "./pages/MiracleOverviewPage";
 import { ScannerMapPage } from "./pages/ScannerMapPage";
-import { ScannerListPage } from "./pages/ScannerListPage";
-import { ScannerOverviewPage } from "./pages/ScannerOverviewPage";
 import { ArchMapPage } from "./pages/ArchMapPage";
-import { ArchListPage } from "./pages/ArchListPage";
-import { ArchOverviewPage } from "./pages/ArchOverviewPage";
 import { AllMapPage } from "./pages/AllMapPage";
+import { NonStopMapPage } from "./pages/NonStopMapPage";
 import { useAchievement } from "./hooks/useAchievement";
 
 function AchievementMap() {
@@ -25,36 +19,45 @@ function AchievementMap() {
   if (achievementId === "miracle-hoarder") return <MiracleMapPage />;
   if (achievementId === "scanning-complete") return <ScannerMapPage />;
   if (achievementId === "curiouser-curiouser") return <ArchMapPage />;
+  if (achievementId === "non-stop") return <NonStopMapPage />;
   if (achievementId === "show-all") return <AllMapPage />;
   return <MapPage />;
 }
 
 function AchievementList() {
   const { achievementId } = useAchievement();
-  if (achievementId === "show-all") {
-    return <Navigate to="/show-all" replace />;
-  }
-  if (achievementId === "miracle-hoarder") return <MiracleListPage />;
-  if (achievementId === "scanning-complete") return <ScannerListPage />;
-  if (achievementId === "curiouser-curiouser") return <ArchListPage />;
-  return <FlashdrivesPage />;
+  return (
+    <Navigate
+      to={
+        achievementId === "show-all" || achievementId === "non-stop"
+          ? `/${achievementId}`
+          : `/${achievementId}?view=list`
+      }
+      replace
+    />
+  );
 }
 
 function AchievementOverview() {
   const { achievementId } = useAchievement();
-  if (achievementId === "show-all") {
-    return <Navigate to="/show-all" replace />;
-  }
-  if (achievementId === "miracle-hoarder") return <MiracleOverviewPage />;
-  if (achievementId === "scanning-complete") return <ScannerOverviewPage />;
-  if (achievementId === "curiouser-curiouser") return <ArchOverviewPage />;
-  return <HomePage />;
+  return (
+    <Navigate
+      to={
+        achievementId === "show-all" || achievementId === "non-stop"
+          ? `/${achievementId}`
+          : `/${achievementId}?view=overview`
+      }
+      replace
+    />
+  );
 }
 
 function AchievementLayout() {
   return (
     <AchievementProvider>
-      <AppShell />
+      <MapDrawerProvider>
+        <AppShell />
+      </MapDrawerProvider>
     </AchievementProvider>
   );
 }
@@ -81,11 +84,11 @@ export default function App() {
             <Route path="overview" element={<AchievementOverview />} />
           </Route>
 
-          <Route path="/flashdrives" element={<Navigate to="/flash-royale/list" replace />} />
-          <Route path="/overview" element={<Navigate to="/flash-royale/overview" replace />} />
+          <Route path="/flashdrives" element={<Navigate to="/flash-royale?view=list" replace />} />
+          <Route path="/overview" element={<Navigate to="/flash-royale?view=overview" replace />} />
           <Route path="/map" element={<Navigate to="/flash-royale" replace />} />
-          <Route path="/pda" element={<Navigate to="/flash-royale/overview#pda-check" replace />} />
-          <Route path="/choices" element={<Navigate to="/flash-royale/overview" replace />} />
+          <Route path="/pda" element={<Navigate to="/flash-royale?view=overview" replace />} />
+          <Route path="/choices" element={<Navigate to="/flash-royale?view=overview" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

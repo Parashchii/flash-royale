@@ -111,6 +111,24 @@ export type ArchArtifact = {
   notes?: string;
 };
 
+/** Limited Edition NON STOP energy drink can (10 hidden). */
+export type NonStopCan = {
+  id: string;
+  nameUk: string;
+  nameEn: string;
+  region: string;
+  regionEn: string;
+  poiUk: string;
+  poiEn: string;
+  worldX: number;
+  worldY: number;
+  worldZ?: number;
+  accessUk: string;
+  accessEn?: string;
+  coordApprox?: boolean;
+  notes?: string;
+};
+
 export type ArtifactStatus = "missing" | "found" | "present";
 
 export type StoryChoices = {
@@ -137,6 +155,10 @@ export type UserProgress = {
   collectedScannerIds: string[];
   /** Arch-artifact IDs collected for Curiouser and Curiouser! */
   collectedArchArtifactIds: string[];
+  /** Limited Edition NON STOP can IDs collected. */
+  collectedNonStopIds: string[];
+  /** Anomaly-field regions the player has not unlocked yet. */
+  inaccessibleRegions: string[];
   choices: StoryChoices;
   updatedAt: number;
 };

@@ -4,6 +4,7 @@ import artifactsJson from "./artifacts.json";
 import anomalyFieldsJson from "./anomalyFields.json";
 import scannersJson from "./scanners.json";
 import archArtifactsJson from "./archArtifacts.json";
+import nonStopJson from "./nonStop.json";
 import type {
   AnomalyField,
   AnomalyType,
@@ -11,6 +12,7 @@ import type {
   Artifact,
   FlashDrive,
   Gear,
+  NonStopCan,
   Scanner,
 } from "./types";
 
@@ -20,6 +22,7 @@ export const ARTIFACTS = artifactsJson as Artifact[];
 export const ANOMALY_FIELDS = anomalyFieldsJson as AnomalyField[];
 export const SCANNERS = scannersJson as Scanner[];
 export const ARCH_ARTIFACTS = archArtifactsJson as ArchArtifact[];
+export const NON_STOP_CANS = nonStopJson as NonStopCan[];
 
 /** Unique blueprint keys required for the achievement (alt locations share a key). */
 export const UNIQUE_BLUEPRINT_KEYS = [
@@ -29,6 +32,17 @@ export const UNIQUE_BLUEPRINT_KEYS = [
 export const TOTAL_UNIQUE = UNIQUE_BLUEPRINT_KEYS.length;
 
 export const TOTAL_ARTIFACTS = ARTIFACTS.length;
+
+/** Artifacts marked found (in anomaly) or present (elsewhere) both count as collected. */
+export function trackedArtifactIds(
+  presentIds: Set<string>,
+  foundIds: Set<string>,
+): Set<string> {
+  if (foundIds.size === 0) return presentIds;
+  const ids = new Set(presentIds);
+  for (const id of foundIds) ids.add(id);
+  return ids;
+}
 
 export const TOTAL_SCANNERS = SCANNERS.length;
 
@@ -49,6 +63,12 @@ export const ARCH_REGIONS = [
 export const archArtifactById = Object.fromEntries(
   ARCH_ARTIFACTS.map((a) => [a.id, a]),
 ) as Record<string, ArchArtifact>;
+
+export const TOTAL_NON_STOP = NON_STOP_CANS.length;
+
+export const nonStopById = Object.fromEntries(
+  NON_STOP_CANS.map((c) => [c.id, c]),
+) as Record<string, NonStopCan>;
 
 export const REGIONS = [
   ...new Set(FLASHDRIVES.map((f) => f.region)),
@@ -86,6 +106,30 @@ export function artifactsForType(type: AnomalyType): Artifact[] {
 export function anomalyFieldsForType(type: AnomalyType): AnomalyField[] {
   return ANOMALY_FIELDS.filter((f) => f.anomalyType === type);
 }
+
+export const ANOMALY_REGIONS = [
+  ...new Set(ANOMALY_FIELDS.map((f) => f.region)),
+].sort((a, b) => a.localeCompare(b, "uk"));
+
+export const ANOMALY_REGION_EN: Record<string, string> = {
+  Болота: "Swamps",
+  Градирні: "Cooling Towers",
+  "Дикий острів": "Wild Island",
+  Дуга: "Duga",
+  Затон: "Zaton",
+  "Згорілий ліс": "Burnt Forest",
+  Кордон: "Cordon",
+  Малахіт: "Malachite",
+  "Прип'ять": "Prypiat",
+  Росток: "Rostok",
+  "Рудий ліс": "Red Forest",
+  Смітник: "Garbage",
+  Хімзавод: "Chemical Plant",
+  "Цементний завод": "Cement Factory",
+  Юпітер: "Jupiter",
+  Янів: "Yaniv",
+  Янтар: "Yantar",
+};
 
 export function missingArtifactTypes(
   collectedIds: Set<string>,

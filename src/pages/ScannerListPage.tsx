@@ -4,6 +4,8 @@ import { SCANNERS, SCANNER_REGIONS, TOTAL_SCANNERS } from "../data/catalog";
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
 import { locField, locName, locRegion } from "../i18n/localize";
+import { FilterCard, FilterChoiceList } from "../components/FilterCard";
+import { ListToolbar } from "../components/ListToolbar";
 
 type StatusFilter = "all" | "missing" | "collected";
 
@@ -33,53 +35,49 @@ export function ScannerListPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <div>
-          <h1>{t("listTitle")}</h1>
-          <p>
-            {collectedScannerIds.size} / {TOTAL_SCANNERS} · {t("listShowing")}{" "}
-            {filtered.length}
-          </p>
-        </div>
+      <header className="page-header mh-list-header">
+        <p>
+          {collectedScannerIds.size} / {TOTAL_SCANNERS} · {t("listShowing")}{" "}
+          {filtered.length}
+        </p>
+        <ListToolbar
+          search={q}
+          onSearch={setQ}
+          searchPlaceholder={t("searchGeneric")}
+        />
       </header>
 
-      <div className="filters sticky-filters">
-        <label>
-          {t("search")}
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t("searchGeneric")}
-          />
-        </label>
-        <label>
-          {t("region")}
-          <select
+      <div className="filter-card-stack">
+        <FilterCard title={t("region")}>
+          <FilterChoiceList
+            label={t("region")}
             value={region}
-            onChange={(e) => setRegion(e.target.value)}
-          >
-            <option value="all">{t("statusAll")}</option>
-            {SCANNER_REGIONS.map((r) => {
-              const sample = SCANNERS.find((s) => s.region === r);
-              return (
-                <option key={r} value={r}>
-                  {sample ? locRegion(sample, locale) : r}
-                </option>
-              );
-            })}
-          </select>
-        </label>
-        <label>
-          {t("status")}
-          <select
+            onChange={setRegion}
+            options={[
+              { value: "all", label: t("statusAll") },
+              ...SCANNER_REGIONS.map((r) => {
+                const sample = SCANNERS.find((s) => s.region === r);
+                return {
+                  value: r,
+                  label: sample ? locRegion(sample, locale) : r,
+                };
+              }),
+            ]}
+          />
+        </FilterCard>
+        <FilterCard title={t("status")}>
+          <FilterChoiceList
+            label={t("status")}
             value={status}
-            onChange={(e) => setStatus(e.target.value as StatusFilter)}
-          >
-            <option value="all">{t("statusAll")}</option>
-            <option value="missing">{t("statusMissing")}</option>
-            <option value="collected">{t("statusCollected")}</option>
-          </select>
-        </label>
+            variant="chips"
+            onChange={(next) => setStatus(next as StatusFilter)}
+            options={[
+              { value: "all", label: t("statusAll") },
+              { value: "missing", label: t("statusMissing") },
+              { value: "collected", label: t("statusCollected") },
+            ]}
+          />
+        </FilterCard>
       </div>
 
       <ul className="flash-list">
@@ -107,14 +105,15 @@ export function ScannerListPage() {
                   )}
                   <span className="access-hint">{s.accessUk}</span>
                   {s.notes && <span className="notes">{s.notes}</span>}
+                  <Link
+                    className="map-pin-link"
+                    to={`/scanning-complete?id=${s.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {t("map")}
+                  </Link>
                 </span>
               </label>
-              <Link
-                className="btn btn-ghost"
-                to={`/scanning-complete?id=${s.id}`}
-              >
-                {t("map")}
-              </Link>
             </li>
           );
         })}

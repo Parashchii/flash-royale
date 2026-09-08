@@ -1,3 +1,4 @@
+import { ANOMALY_REGION_EN } from "../data/catalog";
 import type { AnomalyType } from "../data/types";
 import type { Locale } from "./messages";
 
@@ -20,7 +21,10 @@ export function locRegion(
   item: { region: string; regionEn?: string },
   locale: Locale,
 ): string {
-  if (locale === "en" && item.regionEn) return item.regionEn;
+  if (locale === "en") {
+    if (item.regionEn) return item.regionEn;
+    if (ANOMALY_REGION_EN[item.region]) return ANOMALY_REGION_EN[item.region];
+  }
   return item.region;
 }
 

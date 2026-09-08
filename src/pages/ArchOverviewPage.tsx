@@ -15,7 +15,7 @@ export function ArchOverviewPage() {
   const achName = locName(ACHIEVEMENTS["curiouser-curiouser"], locale);
 
   return (
-    <div className="page home">
+    <div className="page overview-page">
       <header className="hero-home">
         <p className="lede">
           {locale === "uk"
@@ -104,25 +104,6 @@ export function ArchOverviewPage() {
               : "Coordinates from Steam Console Commands; descriptions from UA/EN Steam arch-artifact guides."}
           </li>
         </ol>
-      </section>
-
-      <section className="overview-section" aria-labelledby="pda-title">
-        <h2 id="pda-title">
-          {locale === "uk" ? "Перевірка" : "Tracking"}
-        </h2>
-        <p className="overview-lede">
-          {locale === "uk"
-            ? "Відмічайте зібране в списку або на мапі — прогрес зберігається в цьому браузері (або в хмарі, якщо увійти)."
-            : "Mark collected items in the list or on the map — progress is saved in this browser (or in the cloud if you sign in)."}
-        </p>
-        <div className="choice-actions">
-          <Link className="btn" to="/curiouser-curiouser/list">
-            {locale === "uk" ? "Відкрити список" : "Open list"}
-          </Link>
-          <Link className="btn btn-ghost" to="/curiouser-curiouser">
-            {locale === "uk" ? "Відкрити мапу" : "Open map"}
-          </Link>
-        </div>
       </section>
     </div>
   );

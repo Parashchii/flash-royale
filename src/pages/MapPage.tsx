@@ -18,8 +18,21 @@ import {
   TILE_URL,
   worldToLatLng,
 } from "../lib/mapCoords";
+import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locField, locName, locRegion, locUpgrade } from "../i18n/localize";
+import { FilterChoiceList } from "../components/FilterCard";
+import { GuaranteeFab } from "../components/GuaranteeFab";
+import { MapDrawerBlock, MapLegend } from "../components/MapLegend";
+import { MapSidePanel } from "../components/MapSidePanel";
+import { MapDocsDrawer } from "../components/MapDocsDrawer";
+import { FlashdrivesPage } from "./FlashdrivesPage";
+import { HomePage } from "./HomePage";
+import {
+  FlashGlyph,
+  TRACKER_MARKER_SIZE,
+  flashMarkerHtml,
+} from "../components/TrackerMarkerGlyphs";
 
 type StatusFilter = "all" | "missing" | "collected" | "locked" | "locked_missed";
 
@@ -36,8 +49,6 @@ function markerHtml(
   duplicate: boolean,
   questOnly: boolean,
 ): string {
-  const label =
-    status === "collected" ? "✓" : status === "locked_missed" ? "!" : "◆";
   // Quest-only (НДІЧАЗ) stays red so it remains identifiable on the map
   let tone: string;
   if (questOnly) {
@@ -49,7 +60,7 @@ function markerHtml(
   } else {
     tone = status;
   }
-  return `<span class="fr-marker fr-marker-${tone}${approx ? " fr-marker-approx" : ""}">${label}</span>`;
+  return flashMarkerHtml(tone, approx ? " fr-marker-approx" : "");
 }
 
 export function MapPage() {
@@ -101,10 +112,8 @@ export function MapPage() {
       maxZoom: 7,
       maxBounds: MAP_BOUNDS.pad(0.05),
       zoomControl: false,
-      attributionControl: true,
+      attributionControl: false,
     });
-
-    L.control.zoom({ position: "bottomright" }).addTo(map);
 
     L.tileLayer(TILE_URL, {
       tileSize: 512,
@@ -115,6 +124,7 @@ export function MapPage() {
       attribution: TILE_ATTR,
     }).addTo(map);
 
+    addRegionHoverLayer(map);
     const group = L.layerGroup().addTo(map);
     mapRef.current = map;
     layerRef.current = group;
@@ -150,8 +160,8 @@ export function MapPage() {
           isDuplicateLocation(f),
           Boolean(f.questOnly),
         ),
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
+        iconSize: [TRACKER_MARKER_SIZE, TRACKER_MARKER_SIZE],
+        iconAnchor: [TRACKER_MARKER_SIZE / 2, TRACKER_MARKER_SIZE / 2],
       });
       const marker = L.marker(worldToLatLng(f.worldX, f.worldY), { icon });
       marker.on("click", () => {
@@ -193,8 +203,103 @@ export function MapPage() {
 
   return (
     <div className="page map-page">
-      <section className="guarantee-card" aria-labelledby="guarantee-title">
-        <h2 id="guarantee-title">{t("flashGuaranteeTitle")}</h2>
+      <div className="map-tools">
+        <MapSidePanel title={t("routeBuildTitle")}>
+          <div className="map-filters-card">
+            <MapDrawerBlock title={t("mapPanelTitle")} defaultOpen>
+              <div className="mh-filter-stack">
+                <div>
+                  <h3 className="filter-card-title">{t("region")}</h3>
+                  <FilterChoiceList
+                    label={t("region")}
+                    value={region}
+                    onChange={setRegion}
+                    options={[
+                      { value: "all", label: t("statusAll") },
+                      ...REGIONS.map((r) => ({ value: r, label: r })),
+                    ]}
+                  />
+                </div>
+                <div>
+                  <h3 className="filter-card-title">{t("category")}</h3>
+                  <FilterChoiceList
+                    label={t("category")}
+                    value={category}
+                    onChange={(next) => setCategory(next as typeof category)}
+                    options={[
+                      { value: "all", label: t("statusAll") },
+                      { value: "weapon", label: t("categoryWeapon") },
+                      { value: "helmet", label: t("categoryHelmet") },
+                      { value: "armor", label: t("categoryArmor") },
+                    ]}
+                  />
+                </div>
+                <div>
+                  <h3 className="filter-card-title">{t("status")}</h3>
+                  <FilterChoiceList
+                    label={t("status")}
+                    value={status}
+                    onChange={(next) => setStatus(next as StatusFilter)}
+                    options={[
+                      { value: "all", label: t("statusAll") },
+                      { value: "missing", label: t("statusMissing") },
+                      { value: "collected", label: t("statusCollected") },
+                      { value: "locked", label: t("statusLocked") },
+                      { value: "locked_missed", label: t("statusLockedMissed") },
+                    ]}
+                  />
+                </div>
+                <label className="check-label">
+                  <input
+                    type="checkbox"
+                    checked={spoilers}
+                    onChange={(e) => setSpoilers(e.target.checked)}
+                  />
+                  {t("spoilers")}
+                </label>
+              </div>
+            </MapDrawerBlock>
+            <MapDrawerBlock title={t("routeFarm")} defaultOpen>
+              <p className="mh-route-wip">{t("routeWip")}</p>
+            </MapDrawerBlock>
+          </div>
+
+          <MapLegend>
+            <ul className="hint map-legend">
+            <li>
+              <span className="fr-marker fr-marker-missing legend-swatch">
+                <FlashGlyph size={16} />
+              </span>
+              {t("legendMissing")}
+            </li>
+            <li>
+              <span className="fr-marker fr-marker-duplicate legend-swatch">
+                <FlashGlyph size={16} />
+              </span>
+              {t("legendDuplicate")}
+            </li>
+            <li>
+              <span className="fr-marker fr-marker-quest-only legend-swatch">
+                <FlashGlyph size={16} />
+              </span>
+              {t("legendQuestSircaa")}
+            </li>
+            <li>
+              <span className="fr-marker fr-marker-collected legend-swatch">
+                <FlashGlyph size={16} />
+              </span>
+              {t("legendCollected")}
+            </li>
+            <li>
+              <span className="fr-marker fr-marker-locked_missed legend-swatch">
+                <FlashGlyph size={16} />
+              </span>
+              {t("legendLocked")}
+            </li>
+            </ul>
+          </MapLegend>
+        </MapSidePanel>
+        <GuaranteeFab title={t("flashGuaranteeTitle")}>
         <ul className="guarantee-list">
           <li>
             <span className="guarantee-icon" aria-hidden="true">
@@ -226,7 +331,10 @@ export function MapPage() {
             </span>
           </li>
         </ul>
-      </section>
+      </GuaranteeFab>
+      </div>
+
+      <MapDocsDrawer list={<FlashdrivesPage />} overview={<HomePage />} />
 
       <div className="map-stage">
         <div ref={mapEl} className="pda-map" role="application" aria-label={t("mapAria")} />
@@ -328,81 +436,17 @@ export function MapPage() {
             <div className="choice-actions">
               <Link
                 className="btn btn-ghost"
-                to={`/flash-royale/list?q=${encodeURIComponent(locUpgrade(selected, locale))}`}
+                to={`/flash-royale?view=list&q=${encodeURIComponent(locUpgrade(selected, locale))}`}
               >
                 {t("inList")}
               </Link>
-              <Link className="btn btn-ghost" to="/flash-royale/overview#pda-check">
+              <Link className="btn btn-ghost" to="/flash-royale?view=overview">
                 {t("overview")}
               </Link>
             </div>
           </aside>
         )}
       </div>
-
-      <div className="map-filters-card">
-        <div className="filters map-filters">
-          <label>
-            {t("region")}
-            <select value={region} onChange={(e) => setRegion(e.target.value)}>
-              <option value="all">{t("statusAll")}</option>
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            {t("category")}
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as typeof category)}
-            >
-              <option value="all">{t("statusAll")}</option>
-              <option value="weapon">{t("categoryWeapon")}</option>
-              <option value="helmet">{t("categoryHelmet")}</option>
-              <option value="armor">{t("categoryArmor")}</option>
-            </select>
-          </label>
-          <label>
-            {t("status")}
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as StatusFilter)}
-            >
-              <option value="all">{t("statusAll")}</option>
-              <option value="missing">{t("statusMissing")}</option>
-              <option value="collected">{t("statusCollected")}</option>
-              <option value="locked">{t("statusLocked")}</option>
-              <option value="locked_missed">{t("statusLockedMissed")}</option>
-            </select>
-          </label>
-          <label className="check-label">
-            <input
-              type="checkbox"
-              checked={spoilers}
-              onChange={(e) => setSpoilers(e.target.checked)}
-            />
-            {t("spoilers")}
-          </label>
-        </div>
-      </div>
-
-      <p className="hint map-legend">
-        <span className="fr-marker fr-marker-missing legend-swatch">◆</span>{" "}
-        {t("legendMissing")}{" "}
-        <span className="fr-marker fr-marker-duplicate legend-swatch">◆</span>{" "}
-        {t("legendDuplicate")}{" "}
-        <span className="fr-marker fr-marker-quest-only legend-swatch">◆</span>{" "}
-        {t("legendQuestSircaa")}{" "}
-        <span className="fr-marker fr-marker-collected legend-swatch">✓</span>{" "}
-        {t("legendCollected")}{" "}
-        <span className="fr-marker fr-marker-locked_missed legend-swatch">
-          !
-        </span>{" "}
-        {t("legendLocked")} · {t("legendTiles")}
-      </p>
     </div>
   );
 }
