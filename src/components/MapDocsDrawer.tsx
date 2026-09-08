@@ -63,7 +63,7 @@ export function MapDocsDrawer({
   ]);
   const setCheckOpen = drawer?.setCheckOpen;
   const viewParam = params.get("view");
-  const view = viewParam === "list" ? "list" : "overview";
+  const view = viewParam === "overview" ? "overview" : "list";
   const openedForView = useRef<string | null>(null);
 
   useEffect(() => {

@@ -6,10 +6,8 @@ import { ARCH_ARTIFACTS, ARCH_REGIONS } from "../data/catalog";
 import type { ArchArtifact } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import {
-  MAP_BOUNDS,
-  MAP_CENTER,
-  TILE_ATTR,
-  TILE_URL,
+  pdaMapOptions,
+  pdaTileLayer,
   worldToLatLng,
 } from "../lib/mapCoords";
 import { addRegionHoverLayer } from "../lib/regionOverlay";
@@ -66,25 +64,9 @@ export function ArchMapPage() {
   useEffect(() => {
     if (!mapEl.current || mapRef.current) return;
 
-    const map = L.map(mapEl.current, {
-      crs: L.CRS.Simple,
-      center: MAP_CENTER,
-      zoom: 1,
-      minZoom: 0,
-      maxZoom: 7,
-      maxBounds: MAP_BOUNDS.pad(0.05),
-      zoomControl: false,
-      attributionControl: false,
-    });
+    const map = L.map(mapEl.current, pdaMapOptions());
 
-    L.tileLayer(TILE_URL, {
-      tileSize: 512,
-      maxZoom: 7,
-      maxNativeZoom: 7,
-      bounds: MAP_BOUNDS,
-      noWrap: true,
-      attribution: TILE_ATTR,
-    }).addTo(map);
+    pdaTileLayer().addTo(map);
 
     addRegionHoverLayer(map);
     const group = L.layerGroup().addTo(map);
