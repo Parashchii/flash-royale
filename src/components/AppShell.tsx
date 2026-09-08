@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useLocation, useParams } from "react-router-dom";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import {
   TOTAL_ARCH_ARTIFACTS,
   TOTAL_ARTIFACTS,
@@ -15,7 +15,6 @@ import {
   type AchievementId,
 } from "../data/achievements";
 import { authConfigured, useProgress } from "../hooks/useProgress";
-import { useAchievementOptional } from "../hooks/useAchievement";
 import { useLocale } from "../i18n/LocaleContext";
 import { locName } from "../i18n/localize";
 import { AuthControls } from "./AuthControls";
@@ -87,15 +86,10 @@ export function AppShell({ children }: { children?: React.ReactNode }) {
     collectedNonStopIds,
   } = useProgress();
   const location = useLocation();
-  const params = useParams();
-  const achCtx = useAchievementOptional();
   const { t, locale } = useLocale();
 
   const isHome = location.pathname === "/";
   const isMapPage = isMapPath(location.pathname);
-
-  const achievementId: AchievementId = achCtx?.achievementId
-    ?? (isAchievementId(params.achievementId) ? params.achievementId : "flash-royale");
 
   const showProgress = !isHome;
   const artifactIds = trackedArtifactIds(collectedArtifactIds, foundArtifactIds);

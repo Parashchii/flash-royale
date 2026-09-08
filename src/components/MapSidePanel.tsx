@@ -108,7 +108,9 @@ export function MapSidePanel({
     const prop = isRight ? "--drawer-w-right" : "--drawer-w-left";
     if (open) el.style.setProperty(prop, `${width}px`);
     else el.style.removeProperty(prop);
-    return () => el.style.removeProperty(prop);
+    return () => {
+      el.style.removeProperty(prop);
+    };
   }, [host, open, width, isRight]);
 
   const onResizePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
