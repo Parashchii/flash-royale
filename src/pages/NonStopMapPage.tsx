@@ -13,10 +13,7 @@ import {
 import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locField, locName, locPoi, locRegion } from "../i18n/localize";
-import { MapLegend } from "../components/MapLegend";
-import { MapSidePanel } from "../components/MapSidePanel";
 import {
-  NonStopGlyph,
   TRACKER_MARKER_SIZE,
   nonStopMarkerHtml,
 } from "../components/TrackerMarkerGlyphs";
@@ -122,27 +119,6 @@ export function NonStopMapPage() {
 
   return (
     <div className="page map-page">
-      <div className="map-tools">
-        <MapSidePanel title={t("mapPanelTitle")}>
-          <MapLegend>
-            <ul className="hint map-legend">
-              <li>
-                <span className="ns-marker ns-marker-missing legend-swatch">
-                  <NonStopGlyph height={16} />
-                </span>
-                {t("legendMissing")}
-              </li>
-              <li>
-                <span className="ns-marker ns-marker-collected legend-swatch">
-                  <NonStopGlyph height={16} />
-                </span>
-                {t("legendCollected")}
-              </li>
-            </ul>
-          </MapLegend>
-        </MapSidePanel>
-      </div>
-
       <div className="map-stage">
         <div
           ref={mapEl}

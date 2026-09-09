@@ -4,11 +4,10 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import {
   FLASHDRIVES,
-  REGIONS,
   allLocationsForKey,
   gearById,
 } from "../data/catalog";
-import type { FlashDrive, GearCategory } from "../data/types";
+import type { FlashDrive } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import { statusOf } from "../lib/status";
 import {
@@ -19,20 +18,14 @@ import {
 import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locField, locName, locRegion, locUpgrade } from "../i18n/localize";
-import { FilterChoiceList } from "../components/FilterCard";
 import { GuaranteeFab } from "../components/GuaranteeFab";
-import { MapDrawerBlock, MapLegend } from "../components/MapLegend";
-import { MapSidePanel } from "../components/MapSidePanel";
 import { MapDocsDrawer } from "../components/MapDocsDrawer";
 import { FlashdrivesPage } from "./FlashdrivesPage";
 import { HomePage } from "./HomePage";
 import {
-  FlashGlyph,
   TRACKER_MARKER_SIZE,
   flashMarkerHtml,
 } from "../components/TrackerMarkerGlyphs";
-
-type StatusFilter = "all" | "missing" | "collected" | "locked" | "locked_missed";
 
 /** Verified platform note for the SIRCAA save-reload trick. */
 const QUEST_ONLY_PATCH = "1.010";
@@ -67,11 +60,7 @@ export function MapPage() {
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
 
-  const [region, setRegion] = useState("all");
-  const [category, setCategory] = useState<"all" | GearCategory>("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(focusId);
-  const [spoilers, setSpoilers] = useState(false);
 
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -79,19 +68,8 @@ export function MapPage() {
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
   const filtered = useMemo(() => {
-    return FLASHDRIVES.filter((f) => {
-      if (f.worldX == null || f.worldY == null) return false;
-      const gear = gearById[f.gearId];
-      if (region !== "all" && f.region !== region) return false;
-      if (category !== "all" && gear?.category !== category) return false;
-      const st = statusOf(f, collectedKeys, choices);
-      if (status === "missing" && st !== "missing") return false;
-      if (status === "collected" && st !== "collected") return false;
-      if (status === "locked_missed" && st !== "locked_missed") return false;
-      if (status === "locked" && !f.lock) return false;
-      return true;
-    });
-  }, [region, category, status, collectedKeys, choices]);
+    return FLASHDRIVES.filter((f) => f.worldX != null && f.worldY != null);
+  }, []);
 
   const selected: FlashDrive | null = useMemo(() => {
     if (!selectedId) return null;
@@ -186,101 +164,6 @@ export function MapPage() {
   return (
     <div className="page map-page">
       <div className="map-tools">
-        <MapSidePanel title={t("routeBuildTitle")}>
-          <div className="map-filters-card">
-            <MapDrawerBlock title={t("mapPanelTitle")} defaultOpen>
-              <div className="mh-filter-stack">
-                <div>
-                  <h3 className="filter-card-title">{t("region")}</h3>
-                  <FilterChoiceList
-                    label={t("region")}
-                    value={region}
-                    onChange={setRegion}
-                    options={[
-                      { value: "all", label: t("statusAll") },
-                      ...REGIONS.map((r) => ({ value: r, label: r })),
-                    ]}
-                  />
-                </div>
-                <div>
-                  <h3 className="filter-card-title">{t("category")}</h3>
-                  <FilterChoiceList
-                    label={t("category")}
-                    value={category}
-                    onChange={(next) => setCategory(next as typeof category)}
-                    options={[
-                      { value: "all", label: t("statusAll") },
-                      { value: "weapon", label: t("categoryWeapon") },
-                      { value: "helmet", label: t("categoryHelmet") },
-                      { value: "armor", label: t("categoryArmor") },
-                    ]}
-                  />
-                </div>
-                <div>
-                  <h3 className="filter-card-title">{t("status")}</h3>
-                  <FilterChoiceList
-                    label={t("status")}
-                    value={status}
-                    onChange={(next) => setStatus(next as StatusFilter)}
-                    options={[
-                      { value: "all", label: t("statusAll") },
-                      { value: "missing", label: t("statusMissing") },
-                      { value: "collected", label: t("statusCollected") },
-                      { value: "locked", label: t("statusLocked") },
-                      { value: "locked_missed", label: t("statusLockedMissed") },
-                    ]}
-                  />
-                </div>
-                <label className="check-label">
-                  <input
-                    type="checkbox"
-                    checked={spoilers}
-                    onChange={(e) => setSpoilers(e.target.checked)}
-                  />
-                  {t("spoilers")}
-                </label>
-              </div>
-            </MapDrawerBlock>
-            <MapDrawerBlock title={t("routeFarm")} defaultOpen>
-              <p className="mh-route-wip">{t("routeWip")}</p>
-            </MapDrawerBlock>
-          </div>
-
-          <MapLegend>
-            <ul className="hint map-legend">
-            <li>
-              <span className="fr-marker fr-marker-missing legend-swatch">
-                <FlashGlyph size={16} />
-              </span>
-              {t("legendMissing")}
-            </li>
-            <li>
-              <span className="fr-marker fr-marker-duplicate legend-swatch">
-                <FlashGlyph size={16} />
-              </span>
-              {t("legendDuplicate")}
-            </li>
-            <li>
-              <span className="fr-marker fr-marker-quest-only legend-swatch">
-                <FlashGlyph size={16} />
-              </span>
-              {t("legendQuestSircaa")}
-            </li>
-            <li>
-              <span className="fr-marker fr-marker-collected legend-swatch">
-                <FlashGlyph size={16} />
-              </span>
-              {t("legendCollected")}
-            </li>
-            <li>
-              <span className="fr-marker fr-marker-locked_missed legend-swatch">
-                <FlashGlyph size={16} />
-              </span>
-              {t("legendLocked")}
-            </li>
-            </ul>
-          </MapLegend>
-        </MapSidePanel>
         <GuaranteeFab title={t("flashGuaranteeTitle")}>
         <ul className="guarantee-list">
           <li>
@@ -373,15 +256,13 @@ export function MapPage() {
                     locale,
                   )}
                 </p>
-                {spoilers && (
-                  <p className="lock-detail">
+                <p className="lock-detail">
                     {locField(
                       selected.lock.detailUk,
                       selected.lock.detailEn,
                       locale,
                     )}
                   </p>
-                )}
               </>
             )}
             {selected.questOnly && selected.notes && (

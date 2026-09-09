@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { SCANNERS, SCANNER_REGIONS } from "../data/catalog";
+import { SCANNERS } from "../data/catalog";
 import type { Scanner } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import {
@@ -14,18 +14,13 @@ import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locField, locName, locPoi, locRegion } from "../i18n/localize";
 import { GuaranteeFab } from "../components/GuaranteeFab";
-import { MapLegend } from "../components/MapLegend";
-import { MapSidePanel } from "../components/MapSidePanel";
 import { MapDocsDrawer } from "../components/MapDocsDrawer";
 import { ScannerListPage } from "./ScannerListPage";
 import { ScannerOverviewPage } from "./ScannerOverviewPage";
 import {
-  ScannerGlyph,
   TRACKER_MARKER_SIZE,
   scannerMarkerHtml,
 } from "../components/TrackerMarkerGlyphs";
-
-type StatusFilter = "all" | "missing" | "collected";
 
 function markerHtml(got: boolean): string {
   return scannerMarkerHtml(got);
@@ -37,8 +32,6 @@ export function ScannerMapPage() {
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
 
-  const [region, setRegion] = useState("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(focusId);
 
   const mapEl = useRef<HTMLDivElement>(null);
@@ -46,15 +39,7 @@ export function ScannerMapPage() {
   const layerRef = useRef<L.LayerGroup | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
-  const filtered = useMemo(() => {
-    return SCANNERS.filter((s) => {
-      if (region !== "all" && s.region !== region) return false;
-      const got = collectedScannerIds.has(s.id);
-      if (status === "missing" && got) return false;
-      if (status === "collected" && !got) return false;
-      return true;
-    });
-  }, [region, status, collectedScannerIds]);
+  const filtered = SCANNERS;
 
   const selected: Scanner | null = useMemo(() => {
     if (!selectedId) return null;
@@ -141,55 +126,6 @@ export function ScannerMapPage() {
   return (
     <div className="page map-page">
       <div className="map-tools">
-        <MapSidePanel title={t("mapPanelTitle")}>
-          <div className="map-filters-card">
-            <div className="filters map-filters">
-              <label>
-                {t("region")}
-                <select
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                >
-                  <option value="all">{t("statusAll")}</option>
-                  {SCANNER_REGIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                {t("status")}
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as StatusFilter)}
-                >
-                  <option value="all">{t("statusAll")}</option>
-                  <option value="missing">{t("statusMissing")}</option>
-                  <option value="collected">{t("statusCollected")}</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <MapLegend>
-            <ul className="hint map-legend">
-            <li>
-              <span className="sc-marker sc-marker-missing legend-swatch">
-                <ScannerGlyph size={16} />
-              </span>
-              {t("legendMissing")}
-            </li>
-            <li>
-              <span className="sc-marker sc-marker-collected legend-swatch">
-                <ScannerGlyph size={16} />
-              </span>
-              {t("legendCollected")}
-            </li>
-            <li>{t("legendScannerSources")}</li>
-            </ul>
-          </MapLegend>
-        </MapSidePanel>
         <GuaranteeFab title={t("scannerGuaranteeTitle")}>
         <ul className="guarantee-list">
           <li>

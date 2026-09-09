@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { ARCH_ARTIFACTS, ARCH_REGIONS } from "../data/catalog";
+import { ARCH_ARTIFACTS } from "../data/catalog";
 import type { ArchArtifact } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import {
@@ -14,18 +14,13 @@ import { addRegionHoverLayer } from "../lib/regionOverlay";
 import { useLocale } from "../i18n/LocaleContext";
 import { locAnomaly, locName, locRegion } from "../i18n/localize";
 import { GuaranteeFab } from "../components/GuaranteeFab";
-import { MapLegend } from "../components/MapLegend";
-import { MapSidePanel } from "../components/MapSidePanel";
 import { MapDocsDrawer } from "../components/MapDocsDrawer";
 import { ArchListPage } from "./ArchListPage";
 import { ArchOverviewPage } from "./ArchOverviewPage";
 import {
-  StarGlyph,
   TRACKER_MARKER_SIZE,
   archMarkerHtml,
 } from "../components/TrackerMarkerGlyphs";
-
-type StatusFilter = "all" | "missing" | "collected";
 
 function markerHtml(got: boolean): string {
   return archMarkerHtml(got);
@@ -37,8 +32,6 @@ export function ArchMapPage() {
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
 
-  const [region, setRegion] = useState("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(focusId);
 
   const mapEl = useRef<HTMLDivElement>(null);
@@ -46,15 +39,7 @@ export function ArchMapPage() {
   const layerRef = useRef<L.LayerGroup | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
-  const filtered = useMemo(() => {
-    return ARCH_ARTIFACTS.filter((a) => {
-      if (region !== "all" && a.region !== region) return false;
-      const got = collectedArchArtifactIds.has(a.id);
-      if (status === "missing" && got) return false;
-      if (status === "collected" && !got) return false;
-      return true;
-    });
-  }, [region, status, collectedArchArtifactIds]);
+  const filtered = ARCH_ARTIFACTS;
 
   const selected: ArchArtifact | null = useMemo(() => {
     if (!selectedId) return null;
@@ -141,55 +126,6 @@ export function ArchMapPage() {
   return (
     <div className="page map-page">
       <div className="map-tools">
-        <MapSidePanel title={t("mapPanelTitle")}>
-          <div className="map-filters-card">
-            <div className="filters map-filters">
-              <label>
-                {t("region")}
-                <select
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                >
-                  <option value="all">{t("statusAll")}</option>
-                  {ARCH_REGIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                {t("status")}
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as StatusFilter)}
-                >
-                  <option value="all">{t("statusAll")}</option>
-                  <option value="missing">{t("statusMissing")}</option>
-                  <option value="collected">{t("statusCollected")}</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <MapLegend>
-            <ul className="hint map-legend">
-            <li>
-              <span className="aa-marker aa-marker-missing legend-swatch">
-                <StarGlyph size={16} />
-              </span>
-              {t("legendMissing")}
-            </li>
-            <li>
-              <span className="aa-marker aa-marker-collected legend-swatch">
-                <StarGlyph size={16} />
-              </span>
-              {t("legendCollected")}
-            </li>
-            <li>{t("legendArchSources")}</li>
-            </ul>
-          </MapLegend>
-        </MapSidePanel>
         <GuaranteeFab title={t("archGuaranteeTitle")}>
         <ul className="guarantee-list">
           <li>
