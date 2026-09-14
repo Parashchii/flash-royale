@@ -1,3 +1,4 @@
+import type { CSSProperties, ReactNode } from "react";
 import type { AnomalyType } from "../data/types";
 import gravIcon from "../assets/anomaly-icons/gravitational.png";
 import thermalIcon from "../assets/anomaly-icons/thermal.png";
@@ -124,5 +125,111 @@ export function AnomalyTypeIcon({
         </svg>
       ) : null}
     </span>
+  );
+}
+
+export function ProgressRing({
+  got,
+  total,
+  title,
+  tone,
+  size = "md",
+  children,
+}: {
+  got: number;
+  total: number;
+  title: string;
+  tone: AnomalyType | "all";
+  size?: "sm" | "md" | "lg";
+  children: ReactNode;
+}) {
+  const pct = total > 0 ? Math.min(100, (got / total) * 100) : 0;
+  const complete = pct >= 99.5;
+  return (
+    <span
+      className={`mh-type-ring mh-type-ring-${tone}${size !== "md" ? ` is-${size}` : ""}`}
+      style={{ "--mh-ring-pct": pct } as CSSProperties}
+      title={title}
+    >
+      <svg className="mh-type-ring-svg" viewBox="0 0 36 36" aria-hidden="true">
+        <circle
+          className="mh-type-ring-track"
+          cx="18"
+          cy="18"
+          r="15.6"
+          fill="none"
+          strokeWidth="2.35"
+        />
+        {pct > 0 ? (
+          <circle
+            className="mh-type-ring-value"
+            cx="18"
+            cy="18"
+            r="15.6"
+            fill="none"
+            strokeWidth="2.35"
+            pathLength="100"
+            strokeDasharray={complete ? "100 0" : `${pct} 100`}
+            strokeLinecap={complete ? "butt" : "round"}
+            transform="rotate(-90 18 18)"
+          />
+        ) : null}
+      </svg>
+      {children}
+    </span>
+  );
+}
+
+export function AnomalyTypeProgressMark({
+  type,
+  got,
+  total,
+  title,
+  size = "md",
+}: {
+  type: AnomalyType;
+  got: number;
+  total: number;
+  title: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  const iconPx = size === "lg" ? 44 : size === "sm" ? 26 : 30;
+  return (
+    <ProgressRing
+      got={got}
+      total={total}
+      title={title}
+      tone={type}
+      size={size}
+    >
+      <AnomalyTypeIcon type={type} size={iconPx} onColorBg />
+    </ProgressRing>
+  );
+}
+
+export function CountProgressMark({
+  got,
+  total,
+  title,
+  size = "md",
+}: {
+  got: number;
+  total: number;
+  title: string;
+  size?: "sm" | "md" | "lg";
+}) {
+  return (
+    <ProgressRing
+      got={got}
+      total={total}
+      title={title}
+      tone="all"
+      size={size}
+    >
+      <span className={`mh-donut-count${size === "lg" ? "" : " is-compact"}`}>
+        <strong>{got}</strong>
+        <span>/{total}</span>
+      </span>
+    </ProgressRing>
   );
 }

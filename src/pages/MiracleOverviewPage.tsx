@@ -10,75 +10,73 @@ import { ANOMALY_TYPES } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
 import { anomalyTypeLabel, locName } from "../i18n/localize";
-import { AnomalyTypeIcon } from "../components/AnomalyTypeIcon";
+import {
+  AnomalyTypeProgressMark,
+  ProgressRing,
+} from "../components/AnomalyTypeIcon";
 
 export function MiracleOverviewPage() {
-  const { locale } = useLocale();
+  const { t, locale } = useLocale();
   const { collectedArtifactIds, foundArtifactIds } = useProgress();
   const trackedIds = useMemo(
     () => trackedArtifactIds(collectedArtifactIds, foundArtifactIds),
     [collectedArtifactIds, foundArtifactIds],
   );
   const done = trackedIds.size;
-  const pct = TOTAL_ARTIFACTS
-    ? Math.round((done / TOTAL_ARTIFACTS) * 100)
-    : 0;
   const typeProgress = useMemo(
     () => artifactTypeProgress(trackedIds),
     [trackedIds],
   );
   const achName = locName(ACHIEVEMENTS["miracle-hoarder"], locale);
+  const allLabel = `${done}/${TOTAL_ARTIFACTS} ${t("collectedOf")}`;
 
   return (
-    <div className="page overview-page">
+    <div className="page overview-page mh-overview-immersive">
       <header className="hero-home">
         <p className="lede">
           {locale === "uk"
             ? `Трекер усіх артефактів для досягнення ${achName}.`
             : `Tracker for all artifacts for the ${achName} achievement.`}
         </p>
-        <div
-          className="big-progress"
-          aria-label={`${done} / ${TOTAL_ARTIFACTS}`}
-        >
-          <div className="big-progress-bar" style={{ width: `${pct}%` }} />
-          <span>
-            {done} / {TOTAL_ARTIFACTS} · {pct}%
-          </span>
-        </div>
       </header>
 
-      <section className="overview-section" aria-labelledby="types-title">
-        <h2 id="types-title">
-          {locale === "uk" ? "За типами аномалій" : "By anomaly type"}
-        </h2>
-        <ul className="mh-type-status">
+      <div className="mh-progress-board">
+        <figure className="mh-progress-all">
+          <ProgressRing
+            got={done}
+            total={TOTAL_ARTIFACTS}
+            title={allLabel}
+            tone="all"
+            size="lg"
+          >
+            <span className="mh-donut-count">
+              <strong>{done}</strong>
+              <span>/{TOTAL_ARTIFACTS}</span>
+            </span>
+          </ProgressRing>
+          <figcaption>{t("achMiracleDesc")}</figcaption>
+          <span className="visually-hidden">{allLabel}</span>
+        </figure>
+
+        <div className="mh-progress-types">
           {ANOMALY_TYPES.map((type) => {
             const p = typeProgress[type];
-            const complete = p.got >= p.total && p.total > 0;
+            const collectedLabel = `${p.got}/${p.total} ${t("collectedOf")}`;
             return (
-              <li key={type} className={complete ? "done" : "open"}>
-                <div>
-                  <strong className="mh-type-status-title">
-                    <AnomalyTypeIcon type={type} size={24} onColorBg />
-                    {anomalyTypeLabel(type, locale)}
-                  </strong>
-                  <span>
-                    {p.got}/{p.total}
-                    {complete
-                      ? locale === "uk"
-                        ? " · тип закрито"
-                        : " · type complete"
-                      : locale === "uk"
-                        ? " · ще фармити"
-                        : " · still farming"}
-                  </span>
-                </div>
-              </li>
+              <figure key={type} className="mh-progress-type">
+                <AnomalyTypeProgressMark
+                  type={type}
+                  got={p.got}
+                  total={p.total}
+                  title={collectedLabel}
+                />
+                <figcaption>{anomalyTypeLabel(type, locale)}</figcaption>
+                <span className="visually-hidden">{collectedLabel}</span>
+              </figure>
             );
           })}
-        </ul>
-      </section>
+        </div>
+      </div>
 
       <section className="overview-section" aria-labelledby="howto-title">
         <h2 id="howto-title">Як користуватися</h2>

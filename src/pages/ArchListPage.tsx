@@ -1,15 +1,18 @@
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { ARCH_ARTIFACTS, ARCH_REGIONS } from "../data/catalog";
+import { Link, useSearchParams } from "react-router-dom";
+import { ARCH_ARTIFACTS, TOTAL_ARCH_ARTIFACTS } from "../data/catalog";
 import type { ArchArtifact } from "../data/types";
+import { useMapDrawer } from "../hooks/useMapDrawer";
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
 import { locAnomaly, locName, locRegion } from "../i18n/localize";
-import type { Locale } from "../i18n/messages";
-import { FilterCard, FilterChoiceList } from "../components/FilterCard";
+import { CountProgressMark } from "../components/AnomalyTypeIcon";
 import { ListToolbar } from "../components/ListToolbar";
+import {
+  InspectableShelf,
+  archIconSrc,
+} from "../components/MiracleArtifactShelf";
 
-type StatusFilter = "all" | "missing" | "collected";
 type ViewMode = "list" | "grid";
 type ArchStatus = "missing" | "collected";
 
@@ -23,10 +26,6 @@ function readStoredView(): ViewMode {
     /* ignore */
   }
   return "list";
-}
-
-function archIconSrc(id: string) {
-  return `/arch-artifacts/${id}.png?v=1`;
 }
 
 function ArchStatusSelect({
@@ -54,85 +53,11 @@ function ArchStatusSelect({
   );
 }
 
-function ArchArtifactCard({
-  artifact,
-  got,
-  view,
-  locale,
-  onStatusChange,
-}: {
-  artifact: ArchArtifact;
-  got: boolean;
-  view: ViewMode;
-  locale: Locale;
-  onStatusChange: (status: ArchStatus) => void;
-}) {
-  const status: ArchStatus = got ? "collected" : "missing";
-  const primary = locName(artifact, locale);
-  const secondary = locale === "uk" ? artifact.nameEn : artifact.nameUk;
-  const anomaly = locAnomaly(artifact, locale);
-
-  return (
-    <li
-      className={`mh-artifact mh-art-card mh-artifact-${view} mh-arch-card ${artifact.id} status-${status}`}
-    >
-      {view === "grid" ? (
-        <span className="mh-rarity-tag mh-arch-tag">{anomaly}</span>
-      ) : null}
-      <div className="mh-artifact-row">
-        <span className="mh-artifact-icon-wrap" aria-hidden="true">
-          <img
-            className="mh-artifact-icon"
-            src={archIconSrc(artifact.id)}
-            alt=""
-            width={view === "grid" ? 160 : 128}
-            height={view === "grid" ? 160 : 128}
-            loading="lazy"
-          />
-        </span>
-        <span className="mh-artifact-body">
-          {view === "list" ? (
-            <>
-              <span className="mh-artifact-heading">
-                <span className="mh-artifact-title">{primary}</span>
-                <span className="mh-rarity-tag mh-arch-tag">{anomaly}</span>
-              </span>
-              <span className="mh-artifact-subtitle">{secondary}</span>
-              {artifact.conditionUk ? (
-                <span className="mh-artifact-subtitle">{artifact.conditionUk}</span>
-              ) : null}
-              <ArchStatusSelect
-                value={status}
-                artifactName={primary}
-                onChange={onStatusChange}
-              />
-            </>
-          ) : (
-            <>
-              <span className="mh-artifact-names">
-                <span className="mh-artifact-title">{primary}</span>
-                <span className="mh-artifact-subtitle">{secondary}</span>
-              </span>
-              <ArchStatusSelect
-                value={status}
-                artifactName={primary}
-                onChange={onStatusChange}
-              />
-            </>
-          )}
-        </span>
-      </div>
-    </li>
-  );
-}
-
 export function ArchListPage() {
   const { t, locale } = useLocale();
   const { collectedArchArtifactIds, toggleArchArtifact } = useProgress();
+  const drawer = useMapDrawer();
   const [params] = useSearchParams();
-
-  const [region, setRegion] = useState("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
   const [q, setQ] = useState(params.get("q") ?? "");
   const [view, setView] = useState<ViewMode>(() => readStoredView());
 
@@ -146,50 +71,16 @@ export function ArchListPage() {
   };
 
   const filtered = useMemo(() => {
-    return ARCH_ARTIFACTS.filter((a) => {
-      if (region !== "all" && a.region !== region) return false;
-      const got = collectedArchArtifactIds.has(a.id);
-      if (status === "missing" && got) return false;
-      if (status === "collected" && !got) return false;
-      if (q.trim()) {
-        const hay =
-          `${a.nameUk} ${a.nameEn} ${a.region} ${a.regionEn} ${a.anomalyUk} ${a.anomalyEn} ${a.accessUk}`.toLowerCase();
-        if (!hay.includes(q.trim().toLowerCase())) return false;
-      }
-      return true;
-    });
-  }, [region, status, q, collectedArchArtifactIds]);
-
-  const statusCounts = useMemo(() => {
-    const counts = { missing: 0, collected: 0 };
     const needle = q.trim().toLowerCase();
-    for (const a of ARCH_ARTIFACTS) {
-      if (region !== "all" && a.region !== region) continue;
-      if (needle) {
-        const hay =
-          `${a.nameUk} ${a.nameEn} ${a.region} ${a.regionEn} ${a.anomalyUk} ${a.anomalyEn} ${a.accessUk}`.toLowerCase();
-        if (!hay.includes(needle)) continue;
-      }
-      if (collectedArchArtifactIds.has(a.id)) counts.collected += 1;
-      else counts.missing += 1;
-    }
-    return counts;
-  }, [region, q, collectedArchArtifactIds]);
+    if (!needle) return ARCH_ARTIFACTS;
+    return ARCH_ARTIFACTS.filter((a) => {
+      const hay =
+        `${a.nameUk} ${a.nameEn} ${a.region} ${a.regionEn} ${a.anomalyUk} ${a.anomalyEn} ${a.accessUk}`.toLowerCase();
+      return hay.includes(needle);
+    });
+  }, [q]);
 
-  const grouped = useMemo(() => {
-    return ARCH_REGIONS.map((reg) => {
-      const sample = ARCH_ARTIFACTS.find((a) => a.region === reg);
-      return {
-        region: reg,
-        regionLabel: sample ? locRegion(sample, locale) : reg,
-        items: filtered.filter((a) => a.region === reg),
-        got: ARCH_ARTIFACTS.filter(
-          (a) => a.region === reg && collectedArchArtifactIds.has(a.id),
-        ).length,
-        total: ARCH_ARTIFACTS.filter((a) => a.region === reg).length,
-      };
-    }).filter((g) => g.items.length > 0 || region === g.region);
-  }, [filtered, region, collectedArchArtifactIds, locale]);
+  const collectedLabel = `${collectedArchArtifactIds.size}/${TOTAL_ARCH_ARTIFACTS} ${t("collectedOf")}`;
 
   return (
     <div className="page">
@@ -203,89 +94,72 @@ export function ArchListPage() {
         />
       </header>
 
-      <div className="filter-card-stack">
-        <FilterCard title={t("region")}>
-          <FilterChoiceList
-            label={t("region")}
-            value={region}
-            variant="chips"
-            onChange={setRegion}
-            options={[
-              { value: "all", label: t("statusAll") },
-              ...ARCH_REGIONS.map((r) => {
-                const sample = ARCH_ARTIFACTS.find((a) => a.region === r);
-                return {
-                  value: r,
-                  label: sample ? locRegion(sample, locale) : r,
-                };
-              }),
-            ]}
-          />
-        </FilterCard>
-        <FilterCard title={t("status")}>
-          <FilterChoiceList
-            label={t("status")}
-            value={status}
-            variant="chips"
-            onChange={(next) => setStatus(next as StatusFilter)}
-            options={[
-              { value: "all", label: t("statusAll") },
-              {
-                value: "missing",
-                label: t("statusMissing"),
-                count: statusCounts.missing,
-              },
-              {
-                value: "collected",
-                label: t("statusCollected"),
-                count: statusCounts.collected,
-              },
-            ]}
-          />
-        </FilterCard>
-      </div>
-
-      {grouped.map(({ region: reg, regionLabel, items, got, total }) => (
+      {filtered.length === 0 ? (
+        <p className="hint">{t("noResults")}</p>
+      ) : (
         <section
-          key={reg}
-          className="overview-section mh-section"
-          aria-labelledby={`region-${reg}`}
+          className="overview-section mh-section mh-section-immersive"
+          aria-labelledby="arch-shelf-title"
         >
           <div className="mh-type-header">
             <div className="mh-type-heading">
-              <h2 id={`region-${reg}`}>{regionLabel}</h2>
-              <p className="mh-type-meta">
-                {got}/{total} {t("collectedOf")}
-              </p>
+              <h2 id="arch-shelf-title">
+                <CountProgressMark
+                  got={collectedArchArtifactIds.size}
+                  total={TOTAL_ARCH_ARTIFACTS}
+                  title={collectedLabel}
+                />
+                <span>{t("achArchDesc")}</span>
+                <span className="visually-hidden">{collectedLabel}</span>
+              </h2>
             </div>
           </div>
-          {items.length === 0 ? (
-            <p className="hint">{t("noResults")}</p>
-          ) : (
-            <ul className={`mh-artifact-list mh-artifact-list-${view}`}>
-              {items.map((a) => (
-                <ArchArtifactCard
-                  key={a.id}
-                  artifact={a}
-                  got={collectedArchArtifactIds.has(a.id)}
-                  view={view}
-                  locale={locale}
-                  onStatusChange={(next) => {
-                    const isCollected = collectedArchArtifactIds.has(a.id);
-                    if (next === "collected" && !isCollected) {
-                      toggleArchArtifact(a.id);
-                    } else if (next === "missing" && isCollected) {
-                      toggleArchArtifact(a.id);
-                    }
-                  }}
-                />
-              ))}
-            </ul>
-          )}
+          <InspectableShelf
+            items={filtered.map((artifact: ArchArtifact) => {
+              const gotItem = collectedArchArtifactIds.has(artifact.id);
+              const name = locName(artifact, locale);
+              return {
+                id: artifact.id,
+                name,
+                iconSrc: archIconSrc(artifact.id),
+                found: gotItem,
+                collected: gotItem,
+                extraClass: `is-arch mh-art-arch-${artifact.id}`,
+                popover: (
+                  <>
+                    <p className="mh-art-pop-meta">
+                      {locAnomaly(artifact, locale)}
+                      <span aria-hidden="true"> · </span>
+                      {locRegion(artifact, locale)}
+                    </p>
+                    {artifact.conditionUk ? (
+                      <p className="mh-art-pop-meta">{artifact.conditionUk}</p>
+                    ) : null}
+                    <ArchStatusSelect
+                      value={gotItem ? "collected" : "missing"}
+                      artifactName={name}
+                      onChange={(next) => {
+                        if (next === "collected" && !gotItem) {
+                          toggleArchArtifact(artifact.id);
+                        } else if (next === "missing" && gotItem) {
+                          toggleArchArtifact(artifact.id);
+                        }
+                      }}
+                    />
+                    <Link
+                      className="mh-art-pop-map"
+                      to={`/curiouser-curiouser?id=${encodeURIComponent(artifact.id)}`}
+                      onClick={() => drawer?.setCheckOpen(false)}
+                    >
+                      {t("onMap")}
+                    </Link>
+                  </>
+                ),
+              };
+            })}
+          />
         </section>
-      ))}
-
-      {grouped.length === 0 && <p className="hint">{t("noResults")}</p>}
+      )}
     </div>
   );
 }

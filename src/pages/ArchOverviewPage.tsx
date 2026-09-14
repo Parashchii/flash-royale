@@ -1,82 +1,41 @@
-import { Link } from "react-router-dom";
-import { ARCH_ARTIFACTS, TOTAL_ARCH_ARTIFACTS } from "../data/catalog";
+import {
+  TOTAL_ARCH_ARTIFACTS,
+} from "../data/catalog";
 import { ACHIEVEMENTS } from "../data/achievements";
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
-import { locAnomaly, locName, locRegion } from "../i18n/localize";
+import { locName } from "../i18n/localize";
+import { CountProgressMark } from "../components/AnomalyTypeIcon";
 
 export function ArchOverviewPage() {
   const { t, locale } = useLocale();
   const { collectedArchArtifactIds } = useProgress();
   const done = collectedArchArtifactIds.size;
-  const pct = TOTAL_ARCH_ARTIFACTS
-    ? Math.round((done / TOTAL_ARCH_ARTIFACTS) * 100)
-    : 0;
   const achName = locName(ACHIEVEMENTS["curiouser-curiouser"], locale);
+  const allLabel = `${done}/${TOTAL_ARCH_ARTIFACTS} ${t("collectedOf")}`;
 
   return (
-    <div className="page overview-page">
+    <div className="page overview-page mh-overview-immersive">
       <header className="hero-home">
         <p className="lede">
           {locale === "uk"
             ? `Трекер 6 архіартефактів для досягнення ${achName}.`
             : `Tracker for 6 arch-artifacts for the ${achName} achievement.`}
         </p>
-        <div
-          className="big-progress"
-          aria-label={`${done} / ${TOTAL_ARCH_ARTIFACTS}`}
-        >
-          <div className="big-progress-bar" style={{ width: `${pct}%` }} />
-          <span>
-            {done} / {TOTAL_ARCH_ARTIFACTS} · {pct}%
-          </span>
-        </div>
       </header>
 
-      <section className="overview-section" aria-labelledby="arch-title">
-        <h2 id="arch-title">
-          {locale === "uk" ? "За архіаномаліями" : "By arch-anomalies"}
-        </h2>
-        <ul className="mh-type-status aa-overview-list">
-          {ARCH_ARTIFACTS.map((a) => {
-            const complete = collectedArchArtifactIds.has(a.id);
-            return (
-              <li key={a.id} className={complete ? "done" : "open"}>
-                <div className="aa-overview-item">
-                  <img
-                    className="aa-overview-icon"
-                    src={`/arch-artifacts/${a.id}.png?v=1`}
-                    alt=""
-                    width={56}
-                    height={56}
-                    loading="lazy"
-                  />
-                  <div>
-                    <strong>{locName(a, locale)}</strong>
-                    <span>
-                      {locAnomaly(a, locale)} · {locRegion(a, locale)}
-                      {complete
-                        ? locale === "uk"
-                          ? " · зібрано"
-                          : " · collected"
-                        : locale === "uk"
-                          ? " · ще шукати"
-                          : " · still missing"}
-                      {a.conditionUk ? ` · ${a.conditionUk}` : ""}
-                    </span>
-                  </div>
-                </div>
-                <Link
-                  className="btn btn-ghost"
-                  to={`/curiouser-curiouser?id=${a.id}`}
-                >
-                  {t("map")}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+      <div className="mh-progress-board mh-progress-board-single">
+        <figure className="mh-progress-all">
+          <CountProgressMark
+            got={done}
+            total={TOTAL_ARCH_ARTIFACTS}
+            title={allLabel}
+            size="lg"
+          />
+          <figcaption>{t("achArchDesc")}</figcaption>
+          <span className="visually-hidden">{allLabel}</span>
+        </figure>
+      </div>
 
       <section className="overview-section" aria-labelledby="howto-title">
         <h2 id="howto-title">
