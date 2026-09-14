@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css";
 import {
   FLASHDRIVES,
   allLocationsForKey,
-  gearById,
 } from "../data/catalog";
 import type { FlashDrive } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
@@ -214,41 +213,41 @@ export function MapPage() {
             >
               ×
             </button>
-            <h2 className="sheet-title">
-              {locName(selected, locale)}
-              <span className="sheet-title-en">
-                {locale === "uk" ? selected.nameEn : selected.nameUk}
-              </span>
-            </h2>
+            {(selected.questOnly ||
+              isDuplicateLocation(selected) ||
+              selected.lock) && (
+              <div className="flash-tags">
+                {selected.lock ? (
+                  <span className="lock-badge">
+                    {t("statusLocked")}
+                    {selected.lock.questUk
+                      ? ` · ${locField(selected.lock.questUk, selected.lock.questEn, locale)}`
+                      : ""}
+                  </span>
+                ) : null}
+                {selected.questOnly ? (
+                  <span className="quest-only-badge">{t("questOnlyBadge")}</span>
+                ) : null}
+                {isDuplicateLocation(selected) ? (
+                  <span className="dup-badge">
+                    {t("duplicateBadge")} ·{" "}
+                    {allLocationsForKey(selected.blueprintKey)
+                      .map((a) => locRegion(a, locale))
+                      .join(" / ")}
+                  </span>
+                ) : null}
+              </div>
+            )}
+            <h2 className="sheet-title">{locName(selected, locale)}</h2>
             <p className="flash-meta">
-              {gearById[selected.gearId]
-                ? locName(gearById[selected.gearId], locale)
-                : selected.gearId}{" "}
-              · {locRegion(selected, locale)}
+              {locRegion(selected, locale)}
               {selected.coordApprox ? ` · ${t("approxCoords")}` : ""}
             </p>
-            {selected.questOnly && (
-              <span className="quest-only-badge">{t("questOnlyBadge")}</span>
-            )}
-            {isDuplicateLocation(selected) && (
-              <span className="dup-badge">
-                {t("duplicateBadge")} ·{" "}
-                {allLocationsForKey(selected.blueprintKey)
-                  .map((a) => locRegion(a, locale))
-                  .join(" / ")}
-              </span>
-            )}
             {selected.accessUk && (
               <p className="access-hint sheet-access">{selected.accessUk}</p>
             )}
             {selected.lock && (
               <>
-                <span className="lock-badge">
-                  {t("statusLocked")}
-                  {selected.lock.questUk
-                    ? ` · ${locField(selected.lock.questUk, selected.lock.questEn, locale)}`
-                    : ""}
-                </span>
                 <p className="lock-summary">
                   {locField(
                     selected.lock.summaryUk,
@@ -257,12 +256,12 @@ export function MapPage() {
                   )}
                 </p>
                 <p className="lock-detail">
-                    {locField(
-                      selected.lock.detailUk,
-                      selected.lock.detailEn,
-                      locale,
-                    )}
-                  </p>
+                  {locField(
+                    selected.lock.detailUk,
+                    selected.lock.detailEn,
+                    locale,
+                  )}
+                </p>
               </>
             )}
             {selected.questOnly && selected.notes && (

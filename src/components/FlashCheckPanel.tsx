@@ -9,8 +9,11 @@ import {
 } from "../data/catalog";
 import type { GearCategory } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
+import { useLocale } from "../i18n/LocaleContext";
+import { locUpgrade } from "../i18n/localize";
 import { statusOf } from "../lib/status";
 import { FilterCard, FilterChoiceList } from "./FilterCard";
+import { FlashDriveCard } from "./FlashDriveCard";
 
 const CATEGORY_LABEL: Record<GearCategory, string> = {
   weapon: "Зброя",
@@ -64,6 +67,7 @@ export function FlashHowTo() {
 }
 
 export function FlashPdaCheck() {
+  const { t, locale } = useLocale();
   const {
     collectedKeys,
     verifiedGearIds,
@@ -103,16 +107,17 @@ export function FlashPdaCheck() {
       </p>
 
       <div className="filter-card-stack">
-        <FilterCard title="Категорія">
+        <FilterCard title={t("category")}>
           <FilterChoiceList
-            label="Категорія"
+            label={t("category")}
             value={cat}
+            variant="grid"
             onChange={(next) => setCat(next as typeof cat)}
             options={[
-              { value: "all", label: "Усі" },
-              { value: "weapon", label: "Зброя" },
-              { value: "helmet", label: "Шоломи" },
-              { value: "armor", label: "Броня" },
+              { value: "all", label: t("statusAll") },
+              { value: "weapon", label: t("categoryWeapon") },
+              { value: "helmet", label: t("categoryHelmet") },
+              { value: "armor", label: t("categoryArmor") },
             ]}
           />
         </FilterCard>
@@ -157,38 +162,18 @@ export function FlashPdaCheck() {
                   {drives.map((d) => {
                     const st = statusOf(d, collectedKeys, choices);
                     return (
-                      <li key={d.blueprintKey}>
-                        <label className="flash-check compact">
-                          <input
-                            type="checkbox"
-                            checked={st === "collected"}
-                            onChange={() => toggleCollected(d.blueprintKey)}
-                          />
-                          <span>
-                            <span className="flash-title">{d.upgradeUk}</span>
-                            <span className="flash-meta">{d.region}</span>
-                            {d.accessUk ? (
-                              <span className="access-hint">{d.accessUk}</span>
-                            ) : null}
-                            {d.lock ? (
-                              <span className="lock-badge">
-                                {d.lock.summaryUk}
-                              </span>
-                            ) : null}
-                            {st === "locked_missed" ? (
-                              <span className="ps5-miss">
-                                Заблоковано вибором · PS5: новий сейв
-                              </span>
-                            ) : null}
-                            <Link
-                              className="map-pin-link"
-                              to={`/flash-royale?id=${encodeURIComponent(d.id)}`}
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              На мапі
-                            </Link>
-                          </span>
-                        </label>
+                      <li
+                        key={d.blueprintKey}
+                        className={`flash-row status-${st}${d.lock ? " has-lock" : ""}`}
+                      >
+                        <FlashDriveCard
+                          flash={d}
+                          title={locUpgrade(d, locale)}
+                          checked={st === "collected"}
+                          onToggle={() => toggleCollected(d.blueprintKey)}
+                          compact
+                          lockedMissed={st === "locked_missed"}
+                        />
                       </li>
                     );
                   })}

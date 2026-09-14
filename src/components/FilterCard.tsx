@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { ANOMALY_TYPES, type AnomalyType } from "../data/types";
 import { useLocale } from "../i18n/LocaleContext";
 import { anomalyTypeLabel } from "../i18n/localize";
@@ -27,13 +27,45 @@ export function FilterChoiceList({
   options,
   onChange,
   variant = "stack",
+  scroll = false,
 }: {
   label: string;
   value: string;
   options: readonly { value: string; label: string; count?: number }[];
   onChange: (value: string) => void;
-  variant?: "stack" | "chips";
+  variant?: "stack" | "chips" | "grid";
+  scroll?: boolean;
 }) {
+  const groupId = useId();
+
+  if (variant === "grid") {
+    return (
+      <div
+        className={scroll ? "mh-region-grid is-scrollable" : "mh-region-grid"}
+        role="group"
+        aria-label={label}
+      >
+        {options.map((opt) => {
+          const selected = value === opt.value;
+          return (
+            <label key={opt.value} className="check-label mh-region-check">
+              <input
+                type="checkbox"
+                name={groupId}
+                checked={selected}
+                onChange={() => onChange(opt.value)}
+              />
+              <span className="mh-region-check-text">{opt.label}</span>
+              {opt.count != null ? (
+                <span className="filter-chip-count">{opt.count}</span>
+              ) : null}
+            </label>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <ul
       className={
