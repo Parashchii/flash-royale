@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { SCANNERS, SCANNER_REGIONS, TOTAL_SCANNERS } from "../data/catalog";
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
-import { locField, locName, locRegion } from "../i18n/localize";
+import { locRegion } from "../i18n/localize";
 import { FilterCard, FilterChoiceList } from "../components/FilterCard";
 import { ListToolbar } from "../components/ListToolbar";
+import { ScannerCard } from "../components/ScannerCard";
 
 type StatusFilter = "all" | "missing" | "collected";
 
@@ -52,6 +53,7 @@ export function ScannerListPage() {
           <FilterChoiceList
             label={t("region")}
             value={region}
+            variant="grid"
             onChange={setRegion}
             options={[
               { value: "all", label: t("statusAll") },
@@ -69,7 +71,7 @@ export function ScannerListPage() {
           <FilterChoiceList
             label={t("status")}
             value={status}
-            variant="chips"
+            variant="grid"
             onChange={(next) => setStatus(next as StatusFilter)}
             options={[
               { value: "all", label: t("statusAll") },
@@ -88,32 +90,11 @@ export function ScannerListPage() {
               key={s.id}
               className={`flash-row status-${got ? "collected" : "missing"}`}
             >
-              <label className="flash-check">
-                <input
-                  type="checkbox"
-                  checked={got}
-                  onChange={() => toggleScanner(s.id)}
-                />
-                <span className="flash-body">
-                  <span className="flash-title">{locName(s, locale)}</span>
-                  <span className="flash-meta">
-                    {locRegion(s, locale)} · {s.poiUk} ·{" "}
-                    {locField(s.artifactNameUk, s.artifactNameEn, locale)}
-                  </span>
-                  {s.conditionUk && (
-                    <span className="lock-badge">{s.conditionUk}</span>
-                  )}
-                  <span className="access-hint">{s.accessUk}</span>
-                  {s.notes && <span className="notes">{s.notes}</span>}
-                  <Link
-                    className="map-pin-link"
-                    to={`/scanning-complete?id=${s.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {t("map")}
-                  </Link>
-                </span>
-              </label>
+              <ScannerCard
+                scanner={s}
+                checked={got}
+                onToggle={() => toggleScanner(s.id)}
+              />
             </li>
           );
         })}
