@@ -22,6 +22,7 @@ const emptyProgressArrays = {
   collectedArchArtifactIds: [] as string[],
   collectedNonStopIds: [] as string[],
   inaccessibleRegions: [] as string[],
+  harvestedAnomalyIds: [] as string[],
 };
 
 export const getMine = query({
@@ -52,6 +53,7 @@ export const getMine = query({
       collectedArchArtifactIds: row.collectedArchArtifactIds ?? [],
       collectedNonStopIds: row.collectedNonStopIds ?? [],
       inaccessibleRegions: row.inaccessibleRegions ?? [],
+      harvestedAnomalyIds: row.harvestedAnomalyIds ?? [],
       choices: row.choices,
       updatedAt: row.updatedAt,
     };
@@ -382,6 +384,59 @@ export const toggleInaccessibleRegion = mutation({
   },
 });
 
+export const markAnomalyHarvested = mutation({
+  args: { anomalyId: v.string() },
+  handler: async (ctx, { anomalyId }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    let row = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .unique();
+
+    if (!row) {
+      await ctx.db.insert("userProgress", {
+        userId: identity.subject,
+        ...emptyProgressArrays,
+        harvestedAnomalyIds: [anomalyId],
+        choices: emptyChoices,
+        updatedAt: Date.now(),
+      });
+      return;
+    }
+
+    const current = row.harvestedAnomalyIds ?? [];
+    if (current.includes(anomalyId)) return;
+
+    await ctx.db.patch(row._id, {
+      harvestedAnomalyIds: [...current, anomalyId],
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const clearHarvestedAnomalies = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthorized");
+
+    const row = await ctx.db
+      .query("userProgress")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .unique();
+
+    if (!row) return;
+    if ((row.harvestedAnomalyIds ?? []).length === 0) return;
+
+    await ctx.db.patch(row._id, {
+      harvestedAnomalyIds: [],
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const setChoice = mutation({
   args: {
     key: v.union(
@@ -448,6 +503,7 @@ export const importProgress = mutation({
     collectedArchArtifactIds: v.optional(v.array(v.string())),
     collectedNonStopIds: v.optional(v.array(v.string())),
     inaccessibleRegions: v.optional(v.array(v.string())),
+    harvestedAnomalyIds: v.optional(v.array(v.string())),
     choices: choicesValidator,
   },
   handler: async (ctx, args) => {
@@ -476,6 +532,7 @@ export const importProgress = mutation({
       ],
       collectedNonStopIds: [...new Set(args.collectedNonStopIds ?? [])],
       inaccessibleRegions: [...new Set(args.inaccessibleRegions ?? [])],
+      harvestedAnomalyIds: [...new Set(args.harvestedAnomalyIds ?? [])],
       choices: args.choices,
       updatedAt: Date.now(),
     };

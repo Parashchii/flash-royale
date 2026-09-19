@@ -29,6 +29,7 @@ type ProgressContextValue = {
   collectedArchArtifactIds: Set<string>;
   collectedNonStopIds: Set<string>;
   inaccessibleRegions: Set<string>;
+  harvestedAnomalyIds: Set<string>;
   choices: StoryChoices;
   updatedAt: number;
   mode: "local" | "cloud";
@@ -44,6 +45,8 @@ type ProgressContextValue = {
   toggleArchArtifact: (archId: string) => void;
   toggleNonStop: (canId: string) => void;
   toggleInaccessibleRegion: (region: string) => void;
+  markAnomalyHarvested: (anomalyId: string) => void;
+  clearHarvestedAnomalies: () => void;
   setChoice: (key: ChoiceKey, value: boolean | null) => void;
   reset: () => void;
   exportJson: () => string;
@@ -76,6 +79,7 @@ function normalizeProgress(parsed: Partial<UserProgress> | null): UserProgress {
     collectedArchArtifactIds: [...new Set(parsed?.collectedArchArtifactIds ?? [])],
     collectedNonStopIds: [...new Set(parsed?.collectedNonStopIds ?? [])],
     inaccessibleRegions: [...new Set(parsed?.inaccessibleRegions ?? [])],
+    harvestedAnomalyIds: [...new Set(parsed?.harvestedAnomalyIds ?? [])],
     choices: { ...EMPTY_CHOICES, ...parsed?.choices },
     updatedAt: parsed?.updatedAt ?? 0,
   };
@@ -157,6 +161,7 @@ function useLocalProgressState(): ProgressContextValue {
       collectedArchArtifactIds: new Set(progress.collectedArchArtifactIds),
       collectedNonStopIds: new Set(progress.collectedNonStopIds),
       inaccessibleRegions: new Set(progress.inaccessibleRegions),
+      harvestedAnomalyIds: new Set(progress.harvestedAnomalyIds),
       choices: progress.choices,
       updatedAt: progress.updatedAt,
       mode: "local" as const,
@@ -236,6 +241,22 @@ function useLocalProgressState(): ProgressContextValue {
           return { ...prev, inaccessibleRegions, updatedAt: Date.now() };
         });
       },
+      markAnomalyHarvested: (anomalyId: string) => {
+        setProgress((prev) => {
+          if (prev.harvestedAnomalyIds.includes(anomalyId)) return prev;
+          return {
+            ...prev,
+            harvestedAnomalyIds: [...prev.harvestedAnomalyIds, anomalyId],
+            updatedAt: Date.now(),
+          };
+        });
+      },
+      clearHarvestedAnomalies: () => {
+        setProgress((prev) => {
+          if (prev.harvestedAnomalyIds.length === 0) return prev;
+          return { ...prev, harvestedAnomalyIds: [], updatedAt: Date.now() };
+        });
+      },
       setChoice: (key: ChoiceKey, value: boolean | null) => {
         setProgress((prev) => ({
           ...prev,
@@ -274,6 +295,12 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
   const toggleNonStopRemote = useMutation(api.progress.toggleNonStop);
   const toggleInaccessibleRegionRemote = useMutation(
     api.progress.toggleInaccessibleRegion,
+  );
+  const markAnomalyHarvestedRemote = useMutation(
+    api.progress.markAnomalyHarvested,
+  );
+  const clearHarvestedAnomaliesRemote = useMutation(
+    api.progress.clearHarvestedAnomalies,
   );
   const setChoiceRemote = useMutation(api.progress.setChoice);
   const resetRemote = useMutation(api.progress.reset);
@@ -319,6 +346,9 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
   const inaccessibleList = usingCloud
     ? (remote!.inaccessibleRegions ?? [])
     : localFallback.inaccessibleRegions;
+  const harvestedList = usingCloud
+    ? (remote!.harvestedAnomalyIds ?? [])
+    : localFallback.harvestedAnomalyIds;
   const choices = usingCloud ? remote!.choices : localFallback.choices;
   const updatedAt = usingCloud ? remote!.updatedAt : localFallback.updatedAt;
 
@@ -476,6 +506,35 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
     [isSignedIn, toggleInaccessibleRegionRemote],
   );
 
+  const markAnomalyHarvested = useCallback(
+    (anomalyId: string) => {
+      if (isSignedIn) {
+        void markAnomalyHarvestedRemote({ anomalyId });
+        return;
+      }
+      setLocalFallback((prev) => {
+        if (prev.harvestedAnomalyIds.includes(anomalyId)) return prev;
+        return {
+          ...prev,
+          harvestedAnomalyIds: [...prev.harvestedAnomalyIds, anomalyId],
+          updatedAt: Date.now(),
+        };
+      });
+    },
+    [isSignedIn, markAnomalyHarvestedRemote],
+  );
+
+  const clearHarvestedAnomalies = useCallback(() => {
+    if (isSignedIn) {
+      void clearHarvestedAnomaliesRemote();
+      return;
+    }
+    setLocalFallback((prev) => {
+      if (prev.harvestedAnomalyIds.length === 0) return prev;
+      return { ...prev, harvestedAnomalyIds: [], updatedAt: Date.now() };
+    });
+  }, [isSignedIn, clearHarvestedAnomaliesRemote]);
+
   const setChoice = useCallback(
     (key: ChoiceKey, value: boolean | null) => {
       if (isSignedIn) {
@@ -511,6 +570,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
           collectedArchArtifactIds: archList,
           collectedNonStopIds: nonStopList,
           inaccessibleRegions: inaccessibleList,
+          harvestedAnomalyIds: harvestedList,
           choices,
           updatedAt,
         },
@@ -526,6 +586,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       archList,
       nonStopList,
       inaccessibleList,
+      harvestedList,
       choices,
       updatedAt,
     ],
@@ -549,6 +610,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
         ],
         collectedNonStopIds: [...new Set(parsed.collectedNonStopIds ?? [])],
         inaccessibleRegions: [...new Set(parsed.inaccessibleRegions ?? [])],
+        harvestedAnomalyIds: [...new Set(parsed.harvestedAnomalyIds ?? [])],
         choices: { ...EMPTY_CHOICES, ...parsed.choices },
       };
       if (isSignedIn) {
@@ -570,6 +632,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       collectedArchArtifactIds: new Set(archList),
       collectedNonStopIds: new Set(nonStopList),
       inaccessibleRegions: new Set(inaccessibleList),
+      harvestedAnomalyIds: new Set(harvestedList),
       choices,
       updatedAt,
       mode: isSignedIn ? "cloud" : "local",
@@ -584,6 +647,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       toggleArchArtifact,
       toggleNonStop,
       toggleInaccessibleRegion,
+      markAnomalyHarvested,
+      clearHarvestedAnomalies,
       setChoice,
       reset,
       exportJson,
@@ -598,6 +663,7 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       archList,
       nonStopList,
       inaccessibleList,
+      harvestedList,
       choices,
       updatedAt,
       isSignedIn,
@@ -612,6 +678,8 @@ function CloudProgressProvider({ children }: { children: ReactNode }) {
       toggleArchArtifact,
       toggleNonStop,
       toggleInaccessibleRegion,
+      markAnomalyHarvested,
+      clearHarvestedAnomalies,
       setChoice,
       reset,
       exportJson,

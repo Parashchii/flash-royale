@@ -12,6 +12,8 @@ export declare const api: {
     toggleArchArtifact: any;
     toggleNonStop: any;
     toggleInaccessibleRegion: any;
+    markAnomalyHarvested: any;
+    clearHarvestedAnomalies: any;
     setChoice: any;
     reset: any;
     importProgress: any;

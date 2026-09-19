@@ -201,6 +201,15 @@ export const messages = {
     routeShowMask: "Показати перешкоди",
     routeAccessibleRegions: "Регіони",
     routeStart: "Старт",
+    foundArtifactBtn: "Знайдено артефакт",
+    dialogCancel: "Скасувати",
+    dialogAccept: "Прийняти",
+    anomalyAfterBlowout: "Знову міститиме артефакт після викиду",
+    blowoutFab: "Пройшов викид",
+    blowoutModalTitle: "Пройшов викид",
+    blowoutModalBody:
+      "Усі аномалії, відмічені як зібрані, знову будуть точкою інтересу.",
+    blowoutConfirm: "Підтвердити",
   },
   en: {
     navMap: "Map",
@@ -400,6 +409,15 @@ export const messages = {
     routeShowMask: "Show obstacles",
     routeAccessibleRegions: "Regions",
     routeStart: "Start",
+    foundArtifactBtn: "Artifact found",
+    dialogCancel: "Cancel",
+    dialogAccept: "Accept",
+    anomalyAfterBlowout: "Will hold an artifact again after the emission",
+    blowoutFab: "Emission passed",
+    blowoutModalTitle: "Emission passed",
+    blowoutModalBody:
+      "All anomalies marked as looted will become points of interest again.",
+    blowoutConfirm: "Confirm",
   },
 } as const;
 

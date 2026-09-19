@@ -5,7 +5,6 @@ import "leaflet/dist/leaflet.css";
 import {
   ANOMALY_FIELDS,
   ANOMALY_REGIONS,
-  artifactTypeProgress,
   missingArtifactTypes,
   trackedArtifactIds,
 } from "../data/catalog";
@@ -35,10 +34,13 @@ import {
   anomalyTypeMarkerHtml,
 } from "../components/AnomalyTypeIcon";
 import { AnomalyTypeFilter } from "../components/FilterCard";
+import { AnomalyFieldPopup } from "../components/AnomalyFieldPopup";
+import { BlowoutFab } from "../components/BlowoutFab";
 import { GuaranteeFab } from "../components/GuaranteeFab";
 import { MapDrawerBlock, MapLegend } from "../components/MapLegend";
 import { MapSidePanel } from "../components/MapSidePanel";
 import { MapDocsDrawer } from "../components/MapDocsDrawer";
+import { useMapDrawer } from "../hooks/useMapDrawer";
 import { MiracleListPage } from "./MiracleListPage";
 import { MiracleOverviewPage } from "./MiracleOverviewPage";
 
@@ -48,8 +50,12 @@ export function MiracleMapPage() {
     collectedArtifactIds,
     foundArtifactIds,
     inaccessibleRegions,
+    harvestedAnomalyIds,
     toggleInaccessibleRegion,
+    markAnomalyHarvested,
+    clearHarvestedAnomalies,
   } = useProgress();
+  const drawer = useMapDrawer();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
   const typeParam = params.get("type");
@@ -84,10 +90,6 @@ export function MiracleMapPage() {
     () => missingArtifactTypes(trackedIds),
     [trackedIds],
   );
-  const typeProgress = useMemo(
-    () => artifactTypeProgress(trackedIds),
-    [trackedIds],
-  );
 
   const routeIndexById = useMemo(() => {
     const map = new Map<string, number>();
@@ -99,21 +101,25 @@ export function MiracleMapPage() {
     return ANOMALY_FIELDS.filter((f) => {
       if (anomalyType !== "all" && f.anomalyType !== anomalyType) return false;
       const accessible = !inaccessibleRegions.has(f.region);
-      const worth = accessible && missingTypes.has(f.anomalyType);
+      const worth =
+        accessible &&
+        missingTypes.has(f.anomalyType) &&
+        !harvestedAnomalyIds.has(f.id);
       if (worthOnly && !worth) return false;
       return true;
     });
-  }, [anomalyType, worthOnly, missingTypes, inaccessibleRegions]);
+  }, [anomalyType, worthOnly, missingTypes, inaccessibleRegions, harvestedAnomalyIds]);
 
   const routeGoals = useMemo(
     () =>
       ANOMALY_FIELDS.filter((f) => {
         if (inaccessibleRegions.has(f.region)) return false;
+        if (harvestedAnomalyIds.has(f.id)) return false;
         if (!missingTypes.has(f.anomalyType)) return false;
         if (anomalyType !== "all" && f.anomalyType !== anomalyType) return false;
         return true;
       }).map((f) => ({ id: f.id, x: f.worldX, y: f.worldY })),
-    [inaccessibleRegions, missingTypes, anomalyType],
+    [inaccessibleRegions, harvestedAnomalyIds, missingTypes, anomalyType],
   );
   const routeGoalIds = routeGoals.map((g) => g.id).join(",");
   const routeGoalsRef = useRef(routeGoals);
@@ -159,6 +165,12 @@ export function MiracleMapPage() {
     if (!map) return;
     const onClick = (e: L.LeafletMouseEvent) => {
       setStart(latLngToWorld(e.latlng.lat, e.latlng.lng));
+      setSelectedId(null);
+      setParams((prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete("id");
+        return next;
+      });
     };
     map.on("click", onClick);
     return () => {
@@ -176,7 +188,10 @@ export function MiracleMapPage() {
 
     for (const f of filtered) {
       const accessible = !inaccessibleRegions.has(f.region);
-      const worth = accessible && missingTypes.has(f.anomalyType);
+      const worth =
+        accessible &&
+        missingTypes.has(f.anomalyType) &&
+        !harvestedAnomalyIds.has(f.id);
       const routeIndex = routeIndexById.get(f.id);
       const icon = L.divIcon({
         className: "mh-marker-wrap",
@@ -192,7 +207,8 @@ export function MiracleMapPage() {
         icon,
         zIndexOffset: routeIndex != null ? 400 + routeIndex : 0,
       });
-      marker.on("click", () => {
+      marker.on("click", (e) => {
+        L.DomEvent.stopPropagation(e);
         setSelectedId(f.id);
         setParams((prev) => {
           const next = new URLSearchParams(prev);
@@ -203,7 +219,7 @@ export function MiracleMapPage() {
       marker.addTo(group);
       markersRef.current.set(f.id, marker);
     }
-  }, [filtered, missingTypes, inaccessibleRegions, routeIndexById, setParams]);
+  }, [filtered, missingTypes, inaccessibleRegions, harvestedAnomalyIds, routeIndexById, setParams]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -295,15 +311,6 @@ export function MiracleMapPage() {
   }, [start, routeMode, routeGoalIds]);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !selectedId) return;
-    const f = ANOMALY_FIELDS.find((d) => d.id === selectedId);
-    if (!f) return;
-    const ll = worldToLatLng(f.worldX, f.worldY);
-    map.setView(ll, Math.max(map.getZoom(), 4), { animate: true });
-  }, [selectedId, focusId]);
-
-  useEffect(() => {
     if (focusId) setSelectedId(focusId);
   }, [focusId]);
 
@@ -322,9 +329,18 @@ export function MiracleMapPage() {
     });
   };
 
-  const selectedProg = selected
-    ? typeProgress[selected.anomalyType]
-    : null;
+  const onFoundArtifact = () => {
+    if (!selected) return;
+    markAnomalyHarvested(selected.id);
+    setParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("id", selected.id);
+      next.set("focusType", selected.anomalyType);
+      next.set("view", "list");
+      return next;
+    });
+    drawer?.setCheckOpen(true);
+  };
 
   const requestRoute = (mode: 5 | "all") => {
     if (!start) return;
@@ -568,34 +584,16 @@ export function MiracleMapPage() {
           aria-label={t("mapAriaAnomalies")}
         />
 
-        {selected && selectedProg && (
-          <aside className="map-sheet" aria-live="polite">
-            <button
-              type="button"
-              className="sheet-close"
-              onClick={closeSheet}
-              aria-label={t("close")}
-            >
-              ×
-            </button>
-            <h2 className="sheet-title">
-              {locName(selected, locale)}
-              <span className="sheet-title-en">
-                {locale === "uk" ? selected.nameEn : selected.nameUk}
-              </span>
-            </h2>
-            <p className="flash-meta">
-              <AnomalyTypeIcon type={selected.anomalyType} size={18} />{" "}
-              {anomalyTypeLabel(selected.anomalyType, locale)} ·{" "}
-              {locRegion(selected, locale)}
-              {selected.coordApprox ? ` · ${t("approxCoords")}` : ""}
-            </p>
-            <p className="notes">
-              {selectedProg.got}/{selectedProg.total} {t("typeProgressAfter")}
-            </p>
-            {selected.notes && <p className="notes">{selected.notes}</p>}
-          </aside>
-        )}
+        {selected ? (
+          <AnomalyFieldPopup
+            field={selected}
+            harvested={harvestedAnomalyIds.has(selected.id)}
+            onFound={onFoundArtifact}
+            onClose={closeSheet}
+          />
+        ) : null}
+
+        <BlowoutFab onConfirm={clearHarvestedAnomalies} />
       </div>
     </div>
   );

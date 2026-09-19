@@ -81,6 +81,7 @@ export function AllMapPage() {
     collectedScannerIds,
     collectedArchArtifactIds,
     collectedNonStopIds,
+    harvestedAnomalyIds,
   } = useProgress();
   const [params, setParams] = useSearchParams();
   const focusId = params.get("id");
@@ -144,7 +145,8 @@ export function AllMapPage() {
     }
 
     for (const f of ANOMALY_FIELDS) {
-      const worth = missingTypes.has(f.anomalyType);
+      const worth =
+        missingTypes.has(f.anomalyType) && !harvestedAnomalyIds.has(f.id);
       out.push({
         key: `mh-${f.id}`,
         layer: "miracle-hoarder",
@@ -222,6 +224,7 @@ export function AllMapPage() {
     collectedArchArtifactIds,
     collectedNonStopIds,
     missingTypes,
+    harvestedAnomalyIds,
   ]);
 
   const filtered = useMemo(

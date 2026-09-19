@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   ARTIFACTS,
@@ -7,6 +7,7 @@ import {
 } from "../data/catalog";
 import {
   ANOMALY_TYPES,
+  type AnomalyType,
   type Artifact,
   type ArtifactRarity,
 } from "../data/types";
@@ -59,6 +60,19 @@ export function MiracleListPage() {
   const [params] = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
   const [view, setView] = useState<ViewMode>(() => readStoredView());
+  const focusType = params.get("focusType") ?? params.get("type");
+
+  useEffect(() => {
+    if (!focusType || !ANOMALY_TYPES.includes(focusType as AnomalyType)) return;
+    const id = `type-${focusType}`;
+    const timer = window.setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [focusType]);
 
   const setViewPersist = (next: ViewMode) => {
     setView(next);

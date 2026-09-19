@@ -159,6 +159,11 @@ export type UserProgress = {
   collectedNonStopIds: string[];
   /** Anomaly-field regions the player has not unlocked yet. */
   inaccessibleRegions: string[];
+  /**
+   * Miracle Hoarder: anomaly fields looted this emission cycle.
+   * Cleared when the player marks that a blowout/emission passed.
+   */
+  harvestedAnomalyIds: string[];
   choices: StoryChoices;
   updatedAt: number;
 };
