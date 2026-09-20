@@ -1,4 +1,12 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 import type { Artifact, ArtifactRarity, ArtifactStatus } from "../data/types";
 import { useLocale } from "../i18n/LocaleContext";
 import { anomalyTypeLabel, locName } from "../i18n/localize";
@@ -17,24 +25,6 @@ export function artifactIconSrc(id: string) {
 
 export function archIconSrc(id: string) {
   return `/arch-artifacts/${id}.png?v=1`;
-}
-
-function FoundCheckIcon() {
-  return (
-    <svg
-      className="mh-art-check"
-      viewBox="0 0 20 20"
-      width="12"
-      height="12"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        fill="currentColor"
-        d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.86-9.81a.75.75 0 0 0-1.22-.88l-3.48 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.06l2.5 2.5a.75.75 0 0 0 1.14-.09l4-5.5z"
-      />
-    </svg>
-  );
 }
 
 export function ArtifactStatusSelect({
@@ -74,9 +64,51 @@ export type InspectableShelfItem = {
   popover: ReactNode;
 };
 
+type PopoverPos = {
+  top: number;
+  left: number;
+  width: number;
+  above: boolean;
+};
+
+function popoverPosFor(el: HTMLElement): PopoverPos {
+  const box = el.getBoundingClientRect();
+  const width = Math.max(box.width, 184);
+  const spaceBelow = window.innerHeight - box.bottom;
+  const above = spaceBelow < 168 && box.top > spaceBelow;
+  const top = above ? box.top - 4 : box.bottom - 2;
+  const half = width / 2;
+  const minL = half + 8;
+  const maxL = window.innerWidth - half - 8;
+  let left = box.left + box.width / 2;
+  if (maxL >= minL) left = Math.min(maxL, Math.max(minL, left));
+  return { top, left, width, above };
+}
+
 export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
   const shelfRef = useRef<HTMLUListElement>(null);
+  const itemRefs = useRef(new Map<string, HTMLLIElement>());
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [popPos, setPopPos] = useState<PopoverPos | null>(null);
+
+  useLayoutEffect(() => {
+    if (!activeId) {
+      setPopPos(null);
+      return;
+    }
+    const el = itemRefs.current.get(activeId);
+    if (!el) return;
+
+    const update = () => setPopPos(popoverPosFor(el));
+    update();
+    const scroller = el.closest(".map-drawer-scroll");
+    scroller?.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      scroller?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [activeId]);
 
   useEffect(() => {
     if (!activeId) return;
@@ -85,15 +117,15 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
       const active = document.activeElement;
       return (
         active instanceof HTMLSelectElement &&
-        Boolean(shelfRef.current?.contains(active))
+        Boolean(active.closest(".mh-art-pop, .mh-art-shelf"))
       );
     };
 
     const nodeInsideShelfHit = (node: EventTarget | null) => {
-      if (!(node instanceof Element) || !shelfRef.current) return false;
+      if (!(node instanceof Element)) return false;
+      if (node.closest(".mh-art-pop")) return true;
       return Boolean(
-        shelfRef.current.contains(node) &&
-          node.closest(".mh-art-hit, .mh-art-pop"),
+        shelfRef.current?.contains(node) && node.closest(".mh-art-hit"),
       );
     };
 
@@ -134,14 +166,19 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
     }
     if (
       document.activeElement instanceof HTMLSelectElement &&
-      Boolean(shelfRef.current?.contains(document.activeElement))
+      Boolean(document.activeElement.closest(".mh-art-pop, .mh-art-shelf"))
     ) {
       return;
     }
     setActiveId(null);
   };
 
+  const activeItem = activeId
+    ? items.find((item) => item.id === activeId)
+    : undefined;
+
   return (
+    <>
     <ul
       ref={shelfRef}
       className={`mh-art-shelf${activeId ? " is-inspecting" : ""}`}
@@ -152,6 +189,10 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
         return (
           <li
             key={item.id}
+            ref={(node) => {
+              if (node) itemRefs.current.set(item.id, node);
+              else itemRefs.current.delete(item.id);
+            }}
             className={[
               "mh-art-float",
               item.rarity ? `mh-art-rarity-${item.rarity}` : "",
@@ -202,21 +243,34 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
                 </span>
               </span>
               <span className="mh-art-name">
-                {item.found ? <FoundCheckIcon /> : null}
                 <span className="mh-art-name-text">{item.name}</span>
               </span>
             </button>
-            <div
-              className="mh-art-pop"
-              id={`mh-art-pop-${item.id}`}
-              hidden={!active}
-            >
-              {item.popover}
-            </div>
           </li>
         );
       })}
     </ul>
+    {activeItem && popPos
+      ? createPortal(
+          <div
+            className={`mh-art-pop mh-art-pop-fixed${popPos.above ? " is-above" : ""}`}
+            id={`mh-art-pop-${activeItem.id}`}
+            style={{
+              top: popPos.top,
+              left: popPos.left,
+              minWidth: popPos.width,
+            }}
+            onPointerEnter={() => setActiveId(activeItem.id)}
+            onPointerLeave={(event) =>
+              closeIfMouseLeft(event, event.currentTarget)
+            }
+          >
+            {activeItem.popover}
+          </div>,
+          document.body,
+        )
+      : null}
+    </>
   );
 }
 

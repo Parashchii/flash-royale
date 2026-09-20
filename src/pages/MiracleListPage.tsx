@@ -53,26 +53,73 @@ function readStoredView(): ViewMode {
   return "list";
 }
 
+function pinMapViewport() {
+  window.scrollTo(0, 0);
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+  const root = document.getElementById("root");
+  if (root) root.scrollTop = 0;
+}
+
+function scrollTypeIntoDrawer(type: string) {
+  const heading = document.getElementById(`type-${type}`);
+  if (!heading) return false;
+  const target = heading.closest("section") ?? heading;
+  const scroller = target.closest(".map-drawer-scroll");
+  if (!(scroller instanceof HTMLElement) || scroller.clientHeight < 40) {
+    return false;
+  }
+  const top =
+    target.getBoundingClientRect().top -
+    scroller.getBoundingClientRect().top +
+    scroller.scrollTop;
+  scroller.scrollTo({ top: Math.max(0, top - 12), behavior: "smooth" });
+  return true;
+}
+
 export function MiracleListPage() {
   const { t, locale } = useLocale();
   const { collectedArtifactIds, foundArtifactIds, getArtifactStatus, setArtifactStatus } =
     useProgress();
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
   const [view, setView] = useState<ViewMode>(() => readStoredView());
-  const focusType = params.get("focusType") ?? params.get("type");
+  const focusType = params.get("focusType");
 
   useEffect(() => {
     if (!focusType || !ANOMALY_TYPES.includes(focusType as AnomalyType)) return;
-    const id = `type-${focusType}`;
-    const timer = window.setTimeout(() => {
-      document.getElementById(id)?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 80);
-    return () => window.clearTimeout(timer);
-  }, [focusType]);
+
+    let cancelled = false;
+    let attempts = 0;
+    let timer = 0;
+
+    const finish = () => {
+      pinMapViewport();
+      setParams((prev) => {
+        if (!prev.has("focusType")) return prev;
+        const next = new URLSearchParams(prev);
+        next.delete("focusType");
+        return next;
+      }, { replace: true });
+    };
+
+    const tryScroll = () => {
+      if (cancelled) return;
+      pinMapViewport();
+      attempts += 1;
+      if (scrollTypeIntoDrawer(focusType) || attempts >= 12) {
+        finish();
+        return;
+      }
+      timer = window.setTimeout(tryScroll, 50);
+    };
+
+    timer = window.setTimeout(tryScroll, 50);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [focusType, setParams]);
 
   const setViewPersist = (next: ViewMode) => {
     setView(next);

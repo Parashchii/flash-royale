@@ -7,12 +7,10 @@ import { AnomalyTypeIcon } from "./AnomalyTypeIcon";
 
 export function AnomalyFieldPopup({
   field,
-  harvested,
   onFound,
   onClose,
 }: {
   field: AnomalyField;
-  harvested: boolean;
   onFound: () => void;
   onClose: () => void;
 }) {
@@ -26,7 +24,6 @@ export function AnomalyFieldPopup({
         onClose();
         return;
       }
-      if (harvested) return;
       if (e.key === "f" || e.key === "F") {
         const tag = (e.target as HTMLElement | null)?.tagName;
         if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
@@ -36,10 +33,10 @@ export function AnomalyFieldPopup({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [harvested, onClose, onFound]);
+  }, [onClose, onFound]);
 
   const name = locName(field, locale);
-  const body = harvested ? t("anomalyAfterBlowout") : t("foundArtifactBtn");
+  const body = t("foundArtifactBtn");
 
   return createPortal(
     <div
@@ -72,12 +69,10 @@ export function AnomalyFieldPopup({
             <kbd>Esc</kbd>
             <span>{t("dialogCancel")}</span>
           </button>
-          {harvested ? null : (
-            <button type="button" className="mh-stalker-action" onClick={onFound}>
-              <kbd>F</kbd>
-              <span>{t("dialogAccept")}</span>
-            </button>
-          )}
+          <button type="button" className="mh-stalker-action" onClick={onFound}>
+            <kbd>F</kbd>
+            <span>{t("dialogAccept")}</span>
+          </button>
         </div>
       </div>
     </div>,

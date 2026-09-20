@@ -204,7 +204,8 @@ export const messages = {
     foundArtifactBtn: "Знайдено артефакт",
     dialogCancel: "Скасувати",
     dialogAccept: "Прийняти",
-    anomalyAfterBlowout: "Знову міститиме артефакт після викиду",
+    anomalyAfterBlowout:
+      "«{name}» обшукано: наступний артефакт буде після викиду",
     blowoutFab: "Пройшов викид",
     blowoutModalTitle: "Пройшов викид",
     blowoutModalBody:
@@ -412,7 +413,8 @@ export const messages = {
     foundArtifactBtn: "Artifact found",
     dialogCancel: "Cancel",
     dialogAccept: "Accept",
-    anomalyAfterBlowout: "Will hold an artifact again after the emission",
+    anomalyAfterBlowout:
+      "“{name}” searched: the next artifact will be after the emission",
     blowoutFab: "Emission passed",
     blowoutModalTitle: "Emission passed",
     blowoutModalBody:

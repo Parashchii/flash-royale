@@ -36,6 +36,7 @@ import {
 import { AnomalyTypeFilter } from "../components/FilterCard";
 import { AnomalyFieldPopup } from "../components/AnomalyFieldPopup";
 import { BlowoutFab } from "../components/BlowoutFab";
+import { showViewportChip } from "../components/ViewportChip";
 import { GuaranteeFab } from "../components/GuaranteeFab";
 import { MapDrawerBlock, MapLegend } from "../components/MapLegend";
 import { MapSidePanel } from "../components/MapSidePanel";
@@ -331,16 +332,29 @@ export function MiracleMapPage() {
 
   const onFoundArtifact = () => {
     if (!selected) return;
+    const type = selected.anomalyType;
     markAnomalyHarvested(selected.id);
+    showViewportChip(
+      t("anomalyAfterBlowout").replace("{name}", locName(selected, locale)),
+    );
+    setSelectedId(null);
     setParams((prev) => {
       const next = new URLSearchParams(prev);
-      next.set("id", selected.id);
-      next.set("focusType", selected.anomalyType);
+      next.delete("id");
+      next.set("focusType", type);
       next.set("view", "list");
       return next;
     });
     drawer?.setCheckOpen(true);
   };
+
+  useEffect(() => {
+    if (!selected || !harvestedAnomalyIds.has(selected.id)) return;
+    showViewportChip(
+      t("anomalyAfterBlowout").replace("{name}", locName(selected, locale)),
+    );
+    closeSheet();
+  }, [selected, harvestedAnomalyIds]);
 
   const requestRoute = (mode: 5 | "all") => {
     if (!start) return;
@@ -584,10 +598,9 @@ export function MiracleMapPage() {
           aria-label={t("mapAriaAnomalies")}
         />
 
-        {selected ? (
+        {selected && !harvestedAnomalyIds.has(selected.id) ? (
           <AnomalyFieldPopup
             field={selected}
-            harvested={harvestedAnomalyIds.has(selected.id)}
             onFound={onFoundArtifact}
             onClose={closeSheet}
           />
