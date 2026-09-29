@@ -62,6 +62,8 @@ export type InspectableShelfItem = {
   rarity?: ArtifactRarity;
   extraClass?: string;
   popover: ReactNode;
+  listControl?: ReactNode;
+  listSecondary?: ReactNode;
 };
 
 type PopoverPos = {
@@ -73,7 +75,7 @@ type PopoverPos = {
 
 function popoverPosFor(el: HTMLElement): PopoverPos {
   const box = el.getBoundingClientRect();
-  const width = Math.max(box.width, 184);
+  const width = Math.min(Math.max(box.width, 184), 320);
   const spaceBelow = window.innerHeight - box.bottom;
   const above = spaceBelow < 168 && box.top > spaceBelow;
   const top = above ? box.top - 4 : box.bottom - 2;
@@ -85,11 +87,21 @@ function popoverPosFor(el: HTMLElement): PopoverPos {
   return { top, left, width, above };
 }
 
-export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
+export function InspectableShelf({
+  items,
+  view = "grid",
+}: {
+  items: InspectableShelfItem[];
+  view?: "list" | "grid";
+}) {
   const shelfRef = useRef<HTMLUListElement>(null);
   const itemRefs = useRef(new Map<string, HTMLLIElement>());
   const [activeId, setActiveId] = useState<string | null>(null);
   const [popPos, setPopPos] = useState<PopoverPos | null>(null);
+
+  useEffect(() => {
+    if (view === "list") setActiveId(null);
+  }, [view]);
 
   useLayoutEffect(() => {
     if (!activeId) {
@@ -124,6 +136,7 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
     const nodeInsideShelfHit = (node: EventTarget | null) => {
       if (!(node instanceof Element)) return false;
       if (node.closest(".mh-art-pop")) return true;
+      if (node.closest(".mh-art-list-control")) return true;
       return Boolean(
         shelfRef.current?.contains(node) && node.closest(".mh-art-hit"),
       );
@@ -161,7 +174,10 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
     if (event.pointerType !== "mouse") return;
     const next = event.relatedTarget;
     if (next instanceof Node && inside.contains(next)) return;
-    if (next instanceof Element && next.closest(".mh-art-hit, .mh-art-pop")) {
+    if (
+      next instanceof Element &&
+      next.closest(".mh-art-hit, .mh-art-pop, .mh-art-list-control")
+    ) {
       return;
     }
     if (
@@ -181,7 +197,7 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
     <>
     <ul
       ref={shelfRef}
-      className={`mh-art-shelf${activeId ? " is-inspecting" : ""}`}
+      className={`mh-art-shelf mh-art-shelf-${view}${activeId ? " is-inspecting" : ""}`}
       onPointerLeave={(event) => closeIfMouseLeft(event, event.currentTarget)}
     >
       {items.map((item, index) => {
@@ -205,16 +221,19 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
               .join(" ")}
             style={{ "--mh-art-delay": `${(index % 8) * 0.42}s` } as CSSProperties}
             onPointerEnter={(event) => {
-              if (event.pointerType === "mouse") setActiveId(item.id);
+              if (view === "grid" && event.pointerType === "mouse") {
+                setActiveId(item.id);
+              }
             }}
             onPointerLeave={(event) => closeIfMouseLeft(event, event.currentTarget)}
           >
             <button
               type="button"
               className="mh-art-hit"
-              aria-expanded={active}
-              aria-controls={`mh-art-pop-${item.id}`}
+              aria-expanded={view === "grid" ? active : undefined}
+              aria-controls={view === "grid" ? `mh-art-pop-${item.id}` : undefined}
               onClick={() => {
+                if (view === "list") return;
                 const fineHover = window.matchMedia(
                   "(hover: hover) and (pointer: fine)",
                 ).matches;
@@ -242,15 +261,31 @@ export function InspectableShelf({ items }: { items: InspectableShelfItem[] }) {
                   />
                 </span>
               </span>
-              <span className="mh-art-name">
-                <span className="mh-art-name-text">{item.name}</span>
-              </span>
+              {view === "list" ? (
+                <span className="mh-art-list-copy">
+                  <span className="mh-art-name">
+                    <span className="mh-art-name-text">{item.name}</span>
+                  </span>
+                  {item.listSecondary ? (
+                    <span className="mh-art-list-secondary">
+                      {item.listSecondary}
+                    </span>
+                  ) : null}
+                </span>
+              ) : (
+                <span className="mh-art-name">
+                  <span className="mh-art-name-text">{item.name}</span>
+                </span>
+              )}
             </button>
+            {view === "list" && item.listControl ? (
+              <span className="mh-art-list-control">{item.listControl}</span>
+            ) : null}
           </li>
         );
       })}
     </ul>
-    {activeItem && popPos
+    {view === "grid" && activeItem && popPos
       ? createPortal(
           <div
             className={`mh-art-pop mh-art-pop-fixed${popPos.above ? " is-above" : ""}`}
@@ -278,14 +313,17 @@ export function MiracleArtifactShelf({
   artifacts,
   statusOf,
   onStatusChange,
+  view = "grid",
 }: {
   artifacts: Artifact[];
   statusOf: (id: string) => ArtifactStatus;
   onStatusChange: (id: string, status: ArtifactStatus) => void;
+  view?: "list" | "grid";
 }) {
   const { t, locale } = useLocale();
   return (
     <InspectableShelf
+      view={view}
       items={artifacts.map((artifact) => {
         const status = statusOf(artifact.id);
         const name = locName(artifact, locale);
@@ -297,6 +335,14 @@ export function MiracleArtifactShelf({
           found: status !== "missing",
           collected: status === "present",
           rarity,
+          listSecondary: rarity ? t(RARITY_LABEL[rarity]) : null,
+          listControl: (
+            <ArtifactStatusSelect
+              value={status}
+              artifactName={name}
+              onChange={(next) => onStatusChange(artifact.id, next)}
+            />
+          ),
           popover: (
             <>
               {rarity ? (

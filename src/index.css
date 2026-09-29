@@ -3461,6 +3461,111 @@ html.is-drawer-resizing * {
   background: #000;
 }
 
+.mh-art-shelf-list {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.2rem;
+  padding: 0.25rem;
+}
+
+.mh-status-filter {
+  width: 100%;
+  margin-top: 0.45rem;
+  flex-wrap: wrap;
+  overflow-x: visible;
+}
+
+.mh-art-shelf-list .mh-art-hit {
+  flex: 1 1 auto;
+  width: auto;
+  max-width: none;
+  min-height: 4.25rem;
+  margin: 0;
+  padding: 0.3rem 0.55rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.7rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: default;
+}
+
+.mh-art-shelf-list .mh-art-float {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mh-art-shelf-list .mh-art-hit {
+  border-bottom: 0;
+}
+
+.mh-art-list-control {
+  flex: 0 0 7.5rem;
+  width: 7.5rem;
+  margin-left: auto;
+  padding-right: 0.35rem;
+  pointer-events: auto;
+}
+
+.mh-art-list-control .mh-status-select select {
+  min-height: 2.15rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  font-size: 0.72rem;
+}
+
+.mh-art-shelf-list .mh-art-stage {
+  flex: 0 0 3.65rem;
+  width: 3.65rem;
+}
+
+.mh-art-shelf-list .mh-art-icon {
+  width: 3.65rem;
+}
+
+.mh-art-shelf-list .mh-art-motion {
+  animation: none;
+}
+
+.mh-art-list-copy {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.14rem;
+}
+
+.mh-art-shelf-list .mh-art-name {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  font-size: 0.86rem;
+  text-align: left;
+}
+
+.mh-art-list-secondary {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.mh-art-shelf-list .mh-art-name-text {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+@media (max-width: 420px) {
+  .mh-art-list-control {
+    flex-basis: 6.4rem;
+    width: 6.4rem;
+  }
+}
+
 .mh-art-float {
   --mh-art-glow: #c5d4e4;
   position: relative;
@@ -4174,8 +4279,60 @@ html.is-drawer-resizing * {
   border-radius: var(--radius) var(--radius) 0 0;
 }
 
+.flash-map-sheet {
+  left: 0.55rem;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  max-height: calc(100% - 1.1rem);
+  border: 1px solid rgba(178, 164, 132, 0.62);
+  border-radius: 3px;
+  background-color: #191812;
+  background-image:
+    linear-gradient(rgba(24, 23, 17, 0.91), rgba(17, 16, 12, 0.96)),
+    url("./assets/tab-scratches.svg"),
+    radial-gradient(circle at 16% 8%, rgba(205, 190, 150, 0.14), transparent 48%);
+  background-size: auto, 720px 132px, auto;
+  background-repeat: no-repeat, repeat, no-repeat;
+  box-shadow:
+    inset 0 0 0 1px rgba(8, 7, 5, 0.9),
+    inset 0 0 0 4px rgba(204, 188, 146, 0.08),
+    inset 0 0 30px rgba(0, 0, 0, 0.68),
+    0 16px 44px rgba(0, 0, 0, 0.78);
+}
+
+.flash-map-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+  border: 1px solid rgba(192, 178, 143, 0.24);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.flash-map-sheet > * {
+  position: relative;
+  z-index: 1;
+}
+
+.flash-map-sheet .sheet-close {
+  border: 1px solid rgba(178, 164, 132, 0.28);
+  background: rgba(8, 8, 6, 0.7);
+}
+
 .map-sheet .flash-tags {
   margin: 0 2.75rem 0.35rem 0;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  overflow: visible;
+}
+
+.map-sheet .flash-tags > * {
+  flex: 0 0 auto;
+  max-width: 100%;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .map-sheet h2,
@@ -4302,6 +4459,10 @@ html.is-drawer-resizing * {
     max-height: calc(100% - 1.5rem);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+  }
+
+  .flash-map-sheet {
+    border-radius: 3px;
   }
 }
 

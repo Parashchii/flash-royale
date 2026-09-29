@@ -123,6 +123,11 @@ export function MapPage() {
         iconAnchor: [TRACKER_MARKER_SIZE / 2, TRACKER_MARKER_SIZE / 2],
       });
       const marker = L.marker(worldToLatLng(f.worldX, f.worldY), { icon });
+      if (selectedId) {
+        const isSelected = f.id === selectedId;
+        marker.setOpacity(isSelected ? 1 : 0.5);
+        marker.setZIndexOffset(isSelected ? 1000 : 0);
+      }
       marker.on("click", () => {
         setSelectedId(f.id);
         setParams((prev) => {
@@ -134,7 +139,7 @@ export function MapPage() {
       marker.addTo(group);
       markersRef.current.set(f.id, marker);
     }
-  }, [filtered, collectedKeys, choices, setParams]);
+  }, [filtered, collectedKeys, choices, selectedId, setParams]);
 
   // Focus from URL / selection
   useEffect(() => {
@@ -204,7 +209,7 @@ export function MapPage() {
         <div ref={mapEl} className="pda-map" role="application" aria-label={t("mapAria")} />
 
         {selected && (
-          <aside className="map-sheet" aria-live="polite">
+          <aside className="map-sheet flash-map-sheet" aria-live="polite">
             <button
               type="button"
               className="sheet-close"

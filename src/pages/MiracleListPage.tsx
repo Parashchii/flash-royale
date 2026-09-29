@@ -10,6 +10,7 @@ import {
   type AnomalyType,
   type Artifact,
   type ArtifactRarity,
+  type ArtifactStatus,
 } from "../data/types";
 import { useProgress } from "../hooks/useProgress";
 import { useLocale } from "../i18n/LocaleContext";
@@ -84,6 +85,10 @@ export function MiracleListPage() {
   const [params, setParams] = useSearchParams();
   const [q, setQ] = useState(params.get("q") ?? "");
   const [view, setView] = useState<ViewMode>(() => readStoredView());
+  const [allStatuses, setAllStatuses] = useState(false);
+  const [statusFilters, setStatusFilters] = useState<Set<ArtifactStatus>>(
+    () => new Set(),
+  );
   const focusType = params.get("focusType");
 
   useEffect(() => {
@@ -141,13 +146,35 @@ export function MiracleListPage() {
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return ARTIFACTS;
     return ARTIFACTS.filter((a) => {
+      if (
+        !allStatuses &&
+        statusFilters.size > 0 &&
+        !statusFilters.has(getArtifactStatus(a.id))
+      ) {
+        return false;
+      }
+      if (!needle) return true;
       const hay =
         `${a.nameUk} ${a.nameEn} ${anomalyTypeLabel(a.anomalyType, "uk")} ${anomalyTypeLabel(a.anomalyType, "en")}`.toLowerCase();
       return hay.includes(needle);
     });
-  }, [q]);
+  }, [allStatuses, getArtifactStatus, q, statusFilters]);
+
+  const toggleStatusFilter = (status: ArtifactStatus) => {
+    setAllStatuses(false);
+    setStatusFilters((current) => {
+      const next = new Set(current);
+      if (next.has(status)) next.delete(status);
+      else next.add(status);
+      return next;
+    });
+  };
+
+  const toggleAllStatuses = () => {
+    setAllStatuses((current) => !current);
+    setStatusFilters(new Set());
+  };
 
   const grouped = useMemo(() => {
     return ANOMALY_TYPES.map((type) => ({
@@ -167,6 +194,43 @@ export function MiracleListPage() {
           view={view}
           onView={setViewPersist}
         />
+        <ul
+          className="filter-chip-row mh-status-filter"
+          aria-label={t("status")}
+        >
+          <li>
+            <button
+              type="button"
+              className={allStatuses ? "filter-chip active" : "filter-chip"}
+              aria-pressed={allStatuses}
+              onClick={toggleAllStatuses}
+            >
+              {t("statusAll")}
+            </button>
+          </li>
+          {(
+            [
+              ["missing", t("artifactFilterAbsent")],
+              ["found", t("artifactFilterFound")],
+              ["present", t("artifactFilterPresent")],
+            ] as const
+          ).map(([status, label]) => (
+            <li key={status}>
+              <button
+                type="button"
+                className={
+                  statusFilters.has(status)
+                    ? "filter-chip active"
+                    : "filter-chip"
+                }
+                aria-pressed={statusFilters.has(status)}
+                onClick={() => toggleStatusFilter(status)}
+              >
+                {label}
+              </button>
+            </li>
+          ))}
+        </ul>
       </header>
 
       {grouped.length === 0 ? (
@@ -198,6 +262,7 @@ export function MiracleListPage() {
                 artifacts={items}
                 statusOf={getArtifactStatus}
                 onStatusChange={setArtifactStatus}
+                view={view}
               />
             </section>
           );
